@@ -110,3 +110,4 @@ directories:
 
 ## Authors
 * **Jinwook Jung**
+* **Gi-Joon Nam**
