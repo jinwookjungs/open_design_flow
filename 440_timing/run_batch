@@ -73,8 +73,14 @@ do
 
                 # Move output files
                 rm -f uitimer.tr
+
+                gnuplot ${bench}_critical.plt
+                gnuplot ${bench}.plt
+                mv *.png ${base_name}/out
+
                 mv ${base_name}.log.txt ${base_name}/out
-                mv ${bench}_critical* ${base_name}/out
+                mv ${bench}_critical.log ${base_name}/out
+                mv ${bench}_critical.plt ${base_name}/out
                 mv *.spef ${base_name}/out
                 mv *.tau2015 ${base_name}/out
                 mv *.timing ${base_name}/out
