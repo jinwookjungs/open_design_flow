@@ -1,43 +1,15 @@
 #!/bin/bash
-bench_list=(
-"b19"
-"vga_lcd"
-"mgc_edit_dist" 
-"mgc_matrix_mult" 
-"netcard"
-"leon2" 
-"leon3mp" 
-)
-
-script_list=(
-"resyn"
-"resyn2"
-#"resyn2a"
-"resyn3"
-"compress"
-"compress2"
-#"resyn2rs"
-#"compress2rs"
-#"recadd3"
-)
-
-placer_list=(
-#"Capo"
-#"NTUPlace3"
-#"ComPLx"
-"mPL5"
-"mPL6"
-)
+source ../000_config/config.sh
 
 floorplan_dir="../200_floorplanning"
 placement_dir="../300_placement"
 out_gr=""
 
-tile_size="30"  # 30-50 wire tracks
-adjustment="20" # 20% of available wire tracks: block porosity
-safety="90"     # 90-100% of tile size: guardband
+#tile_size="30"  # 30-50 wire tracks
+#adjustment="20" # 20% of available wire tracks: block porosity
+#safety="90"     # 90-100% of tile size: guardband
+#num_layer="6"
 mode="3"
-num_layer="6"
 
 for bench in "${bench_list[@]}"
 do
