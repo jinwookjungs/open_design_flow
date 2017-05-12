@@ -108,6 +108,15 @@ directories:
     ./430_write_def
     ./440_timing
 
+## Reference
+Jinwook Jung, Iris Hui-Ru Jiang, Gi-Joon Nam, Victor N. Kravets, Laleh Behjat, and Yin-Lang Li. 2016. OpenDesign flow database: the infrastructure for VLSI design and design automation research. In Proceedings of the 35th International Conference on Computer-Aided Design (ICCAD '16). ACM, New York, NY, USA, , Article 42 , 6 pages. DOI: https://doi.org/10.1145/2966986.2980074
+
 ## Authors
-* **Jinwook Jung**
+* [**Jinwook Jung**](mailto:jinwookjungs@gmail.com)
 * **Gi-Joon Nam**
+
+## Advisors
+* Iris Hui-Ru Jiang
+* Victor N. Kravets
+* Laleh Behjat
+* Yi-Lang Li
