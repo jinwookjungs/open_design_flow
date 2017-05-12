@@ -1,37 +1,10 @@
 #!/bin/bash
-bench_list=(
-"b19"
-"vga_lcd"
-"mgc_edit_dist" 
-#"mgc_matrix_mult" 
-#"netcard"
-#"leon2" 
-#"leon3mp" 
-)
+source ../000_config/config.sh
 
-script_list=(
-"resyn"
-"resyn2"
-#"resyn2a"
-"resyn3"
-"compress"
-"compress2"
-#"resyn2rs"
-#"compress2rs"
-#"recadd3"
-)
-
-placer_list=(
-"Capo"
-"NTUPlace3"
-#"mPL6"
-#"mPL5"
-"ComPLx"
-)
-
-sizer_list=(
-"USizer"
-)
+if test $run_gs = false ; then
+#    echo "Gate sizing is turned off."
+    exit
+fi
 
 bench_dir=`cd ../bench; pwd -P`
 logic_synth_dir=`cd ../100_logic_synthesis; pwd -P`
@@ -48,6 +21,9 @@ clock_name='iccad_clk'
 lib_dir=`cd ../bench/techlib; pwd -P`
 sizer_lib="${lib_dir}/open_eda_Late.lib"
 sizer_lib_name="cell.lib"
+
+base_name=${bench}_${script}_${placer}_${sizer}
+log=${base_name}.log.txt
 
 for bench in "${bench_list[@]}"
 do
@@ -84,7 +60,7 @@ do
                 cmd="../../bin/FastPlace3.0_Linux64_DP -legalize -noDp"
                 cmd="$cmd . ${bench}.aux . ${bench}.pl"
                 echo $cmd
-                $cmd
+                eval $cmd | tee ${log}
 
                 # Plotting
                 cmd="python3 ../../utils/300_placement_plotter.py"

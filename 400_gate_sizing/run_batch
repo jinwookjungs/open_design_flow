@@ -15,6 +15,11 @@ lib_dir=`cd ../bench/techlib; pwd -P`
 sizer_lib="${lib_dir}/open_eda_Late.lib"
 sizer_lib_name="cell.lib"
 
+if test $run_gs = false ; then
+    echo "Gate sizing is turned off."
+    exit
+fi
+
 for bench in "${bench_list[@]}"
 do
     for script in "${script_list[@]}"
@@ -23,7 +28,7 @@ do
         do
             for sizer in "${sizer_list[@]}"
             do
-                log_name=${bench}_${script}_${placer}_${sizer}.log
+                log_name=${bench}_${script}_${placer}_${sizer}.log.txt
 
                 # ABC output verilog file
                 verilog_name=${bench}_${script}_final.v

@@ -3,6 +3,8 @@ source ../000_config/config.sh
 
 floorplan_dir="../200_floorplanning"
 placement_dir="../300_placement"
+sizing_dir="../420_legalization"
+
 out_gr=""
 
 #tile_size="30"  # 30-50 wire tracks
@@ -38,14 +40,21 @@ do
 
             echo "Run: gen_routing_benchmark.pl"
             echo "Output: ${out_name}.gr"
-            echo "Log: ${out_name}.log"
+            echo "Log: ${out_name}.log.txt"
+
+            if test $run_gs = false; then
+                bookshelf_pl="${placement_dir}/${out_dir}/${solution_pl}"
+            else
+                bookshelf_pl="${sizing_dir}/${bench}_${script}_${placer}_${sizer}_FP/${bench}_FP_lg.pl"
+            fi
+
             bookshelf_dir=${floorplan_dir}/bookshelf-${bench}_${script}
             perl ../utils/500_gen_routing_benchmark.pl ${bookshelf_dir}/${bench}.nodes \
-                                                ${placement_dir}/${out_dir}/${solution_pl} \
+                                                ${bookshelf_pl} \
                                                 ${bookshelf_dir}/${bench}.nets \
                                                 ${bookshelf_dir}/${bench}.scl ${out_name}.gr \
                                                 $tile_size $adjustment $safety $mode $num_layer \
-                                                | tee ${out_name}.log
+                                                | tee ${out_name}.log.txt
 
             # generarte bookshelf .route file
             ../utils/500_gen_bookshelf_route.tcl ${out_name}.gr ${bookshelf_dir}/${bench}.nodes

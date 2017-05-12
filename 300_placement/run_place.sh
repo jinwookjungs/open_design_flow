@@ -27,7 +27,7 @@ out_dir=$4
 aux_file=${bookshelf_dir}/${bench}.aux
 
 bin_dir="../bin"
-log=${bench}_${placer}.log
+log=${bench}_${placer}.log.txt
 
 
 #------------------------------------------------------------------------------

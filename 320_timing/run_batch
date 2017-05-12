@@ -55,11 +55,11 @@ do
             # Run
             cmd="./iccad2015_evaluate_solution $ICCAD_PARM $iccad_file $UTIL"
             echo $cmd
-            $cmd | tee ${base_name}.log
+            $cmd | tee ${base_name}.log.txt
 
             # Move output files
             rm -f uitimer.tr
-            mv ${base_name}.log ${base_name}/out
+            mv ${base_name}.log.txt ${base_name}/out
             mv ${bench}_critical* ${base_name}/out
             mv *.spef ${base_name}/out/${bench}.spef
             mv *.tau2015 ${base_name}/out/${bench}.tau2015

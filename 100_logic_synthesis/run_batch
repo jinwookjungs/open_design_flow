@@ -16,7 +16,7 @@ for bench in "${bench_list[@]}"
 do
 	for script in "${script_list[@]}"
 	do
-		./run_abc.sh $bench $script $max_fo | tee ${bench}_${script}.log
+		./run_abc.sh $bench $script $max_fo | tee ${bench}_${script}.log.txt
 	done
 done
 

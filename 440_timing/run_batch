@@ -1,37 +1,10 @@
 #!/bin/bash
-bench_list=(
-"b19"
-#"vga_lcd"
-#"mgc_edit_dist" 
-#"mgc_matrix_mult" 
-#"netcard"
-#"leon2" 
-#"leon3mp" 
-)
+source ../000_config/config.sh
 
-script_list=(
-"resyn"
-#"resyn2"
-#"resyn2a"
-#"resyn3"
-#"compress"
-#"compress2"
-#"resyn2rs"
-#"compress2rs"
-#"recadd3"
-)
-
-placer_list=(
-#"Capo"
-#"NTUPlace3"
-"ComPLx"
-#"mPL5"
-#"mPL6"
-)
-
-sizer_list=(
-"USizer"
-)
+if [ $run_gs = false ] ; then
+#    echo "Gate sizing is turned off."
+    exit
+fi
 
 bench_dir=`cd ../bench; pwd -P`
 logic_synth_dir=`cd ../100_logic_synthesis; pwd -P`
@@ -96,11 +69,11 @@ do
                 # Run
                 cmd="./iccad2015_evaluate_solution $ICCAD_PARM $iccad_file $UTIL"
                 echo $cmd
-                $cmd | tee ${base_name}.log
+                $cmd | tee ${base_name}.log.txt
 
                 # Move output files
                 rm -f uitimer.tr
-                mv ${base_name}.log ${base_name}/out
+                mv ${base_name}.log.txt ${base_name}/out
                 mv ${bench}_critical* ${base_name}/out
                 mv *.spef ${base_name}/out
                 mv *.tau2015 ${base_name}/out

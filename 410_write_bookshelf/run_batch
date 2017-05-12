@@ -1,37 +1,10 @@
 #!/bin/bash
-bench_list=(
-"b19"
-"vga_lcd"
-"mgc_edit_dist" 
-#"mgc_matrix_mult" 
-#"netcard"
-#"leon2" 
-#"leon3mp" 
-)
+source ../000_config/config.sh
 
-script_list=(
-"resyn"
-"resyn2"
-#"resyn2a"
-"resyn3"
-"compress"
-"compress2"
-#"resyn2rs"
-#"compress2rs"
-#"recadd3"
-)
-
-placer_list=(
-"Capo"
-"NTUPlace3"
-#"mPL6"
-#"mPL5"
-"ComPLx"
-)
-
-sizer_list=(
-"USizer"
-)
+if test $run_gs = false ; then
+#    echo "Gate sizing is turned off."
+    exit
+fi
 
 bench_dir=`cd ../bench; pwd -P`
 logic_synth_dir=`cd ../100_logic_synthesis; pwd -P`
