@@ -1,0 +1,33 @@
+#!/bin/bash
+source ../000_config/config.sh
+
+bench_dir="../bench"
+logic_synth_dir="../100_logic_synthesis"
+clock_name="iccad_clk"
+
+echo ""
+echo "================================================================================"
+echo "                     FLOORPLANNING - Bookshelf generation"
+echo "================================================================================"
+echo ""
+
+for bench in "${bench_list[@]}"
+do
+    lef_file="${bench_dir}/${bench}/${bench}.lef"
+    def_file="${bench_dir}/${bench}/${bench}.def"
+
+	for script in "${script_list[@]}"
+	do
+        base_name=${bench}_${script}
+        verilog_name=${base_name}_final.v
+        ./run_fp.sh $bench ${logic_synth_dir}/${bench}_${script}/${verilog_name} iccad_clk ${lef_file} ${def_file}
+
+        out_dir="bookshelf-${base_name}"
+        if [ -d $out_dir ]; then
+            rm -rf $out_dir
+        fi
+
+        mkdir ${out_dir}
+        mv ${bench}* ${out_dir}
+	done
+done

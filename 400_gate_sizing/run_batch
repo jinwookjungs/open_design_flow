@@ -1,0 +1,86 @@
+#!/bin/bash
+source ../000_config/config.sh
+
+bench_dir=`cd ../bench; pwd -P`
+logic_synth_dir=`cd ../100_logic_synthesis; pwd -P`
+floorplan_dir=`cd ../200_floorplanning; pwd -P`
+placement_dir=`cd ../300_placement; pwd -P`
+write_def_dir=`cd ../310_write_def; pwd -P`
+timing_dir=`cd ../320_timing; pwd -P`
+
+clock_name='iccad_clk'
+
+# Gate library
+lib_dir=`cd ../bench/techlib; pwd -P`
+sizer_lib="${lib_dir}/open_eda_Late.lib"
+sizer_lib_name="cell.lib"
+
+for bench in "${bench_list[@]}"
+do
+    for script in "${script_list[@]}"
+    do
+        for placer in "${placer_list[@]}"
+        do
+            for sizer in "${sizer_list[@]}"
+            do
+                log_name=${bench}_${script}_${placer}_${sizer}.log
+
+                # ABC output verilog file
+                verilog_name=${bench}_${script}_final.v
+                ln -s ${logic_synth_dir}/${bench}_${script}/${verilog_name} 
+
+                # Generate Verilog and SDC
+                sizer_verilog_input=${bench}_${script}_sizer_input.v
+                # sizer_sdc_name=${bench}_${script}_sizer.sdc
+                cmd="python3 ../utils/400_generate_sizer_input.py"
+                cmd="$cmd -i ${verilog_name} -o ${sizer_verilog_input}"
+                cmd="$cmd --clock ${clock_name} --clock_period 50000.0"
+
+                echo $cmd
+                $cmd
+
+                # Original SDC
+                rm -f ${bench}_${script}_sizer_input.sdc
+                sizer_sdc_name=${bench}.sdc
+                cp ../bench/${bench}/${bench}.sdc .
+
+                # SPEF file
+                spef_name=${bench}.spef
+                ln -s ${timing_dir}/${bench}_${script}_${placer}/out/$spef_name
+
+                # Liberty file
+                ln -s $sizer_lib $sizer_lib_name
+
+                #
+                out_dir=${bench}_${script}_${placer}_${sizer}
+                sizing_output=${bench}_${script}_${placer}_${sizer}.v
+                if [ -d "$out_dir" ]; then
+                    rm -rf $out_dir
+                fi
+                mkdir $out_dir
+
+                # Run sizer
+                cmd="./run_sizer.sh ${sizer_verilog_input} ${sizer_sdc_name}"
+                cmd="$cmd ${spef_name} ${sizer_lib_name}"
+                cmd="$cmd $sizer"
+                cmd="$cmd $out_dir"
+                echo $cmd; 
+                $cmd | tee $log_name
+
+                mv ${verilog_name} ${out_dir}
+                mv ${sizer_verilog_input} ${out_dir}
+                mv ${sizer_sdc_name} ${out_dir}
+                mv ${spef_name} ${out_dir}
+                mv ${sizer_lib_name} ${out_dir}
+                mv ${log_name} ${out_dir}
+                if [ $sizer == "USizer" ]
+                then
+                    mv usizer.config ${out_dir}
+                    mv usizer_usizer.v ${out_dir}/${sizing_output}
+                fi
+                # mv lib-characterization-le.report ${out_dir}
+            done
+        done
+    done
+done
+

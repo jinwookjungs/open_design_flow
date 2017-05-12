@@ -1,0 +1,77 @@
+#!/bin/bash
+bench_list=(
+"b19"
+"vga_lcd"
+"mgc_edit_dist" 
+#"mgc_matrix_mult" 
+#"netcard"
+#"leon2" 
+#"leon3mp" 
+)
+
+script_list=(
+"resyn"
+"resyn2"
+#"resyn2a"
+"resyn3"
+"compress"
+"compress2"
+#"resyn2rs"
+#"compress2rs"
+#"recadd3"
+)
+
+placer_list=(
+"Capo"
+"NTUPlace3"
+#"mPL6"
+#"mPL5"
+"ComPLx"
+)
+
+sizer_list=(
+"USizer"
+)
+
+bench_dir=`cd ../bench; pwd -P`
+logic_synth_dir=`cd ../100_logic_synthesis; pwd -P`
+floorplan_dir=`cd ../200_floorplanning; pwd -P`
+placement_dir=`cd ../300_placement; pwd -P`
+write_def_dir=`cd ../310_write_def; pwd -P`
+timing_dir=`cd ../320_timing; pwd -P`
+sizer_dir=`cd ../400_gate_sizing; pwd -P`
+
+clock_name='iccad_clk'
+
+# Gate library
+lib_dir=`cd ../bench/techlib; pwd -P`
+sizer_lib="${lib_dir}/open_eda_Late.lib"
+sizer_lib_name="cell.lib"
+
+for bench in "${bench_list[@]}"
+do
+    for script in "${script_list[@]}"
+    do
+        for placer in "${placer_list[@]}"
+        do
+            for sizer in "${sizer_list[@]}"
+            do
+                input_bookshelf_nodes=${floorplan_dir}/bookshelf-${bench}_${script}/${bench}.nodes
+                sizing_output_dir=${sizer_dir}/${bench}_${script}_${placer}_${sizer}
+                sizing_output_verilog=${sizing_output_dir}/${bench}_${script}_${placer}_${sizer}.v
+                lef=${bench_dir}/${bench}/${bench}.lef
+
+                output_bookshelf_nodes=${bench}_${script}_${placer}_${sizer}.nodes
+                cmd="python3 ../utils/410_create_bookshelf_nodes_after_sizing.py"
+                cmd="$cmd --bs_nodes ${input_bookshelf_nodes}"
+                cmd="$cmd --verilog ${sizing_output_verilog}"
+                cmd="$cmd --lef ${lef}"
+                cmd="$cmd -o ${output_bookshelf_nodes}"
+
+                echo $cmd
+                $cmd
+            done
+        done
+    done
+done
+

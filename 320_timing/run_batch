@@ -1,0 +1,71 @@
+#!/bin/bash
+source ../000_config/config.sh
+
+bench_dir=`cd ../bench; pwd -P`
+logic_synth_dir=`cd ../100_logic_synthesis; pwd -P`
+floorplan_dir=`cd ../200_floorplanning; pwd -P`
+placement_dir=`cd ../300_placement; pwd -P`
+write_def_dir=`cd ../310_write_def; pwd -P`
+
+ICCAD_PARM='ICCAD15.parm'
+UTIL=0.9
+
+# Name used in ICCAD file
+
+for bench in "${bench_list[@]}"
+do
+    early_lib_name="${bench}_Early.lib"
+    late_lib_name="${bench}_Late.lib"
+    lef_name="${bench}.lef"
+
+    early_lib="${bench_dir}/${bench}/${early_lib_name}"
+    late_lib="${bench_dir}/${bench}/${late_lib_name}"
+    lef="${bench_dir}/${bench}/${lef_name}"
+	for script in "${script_list[@]}"
+	do
+        for placer in "${placer_list[@]}"
+        do
+            base_name=${bench}_${script}_${placer}
+            
+            if [ -d ${base_name} ]; then
+                rm -rf ${base_name}
+            fi
+            mkdir -p ${base_name}/out
+
+            # library
+            ln -s $early_lib ${base_name}/$early_lib_name
+            ln -s $late_lib ${base_name}/$late_lib_name
+            ln -s $lef ${base_name}/$lef_name
+
+            # Design
+            verilog_name=${bench}_${script}_final.v
+            def_name=${base_name}.def
+            sdc_name=${bench}.sdc
+    
+            # Path
+            ln -s ${logic_synth_dir}/${bench}_${script}/${verilog_name} ${base_name}/${verilog_name}
+            ln -s ${write_def_dir}/${def_name} ${base_name}/${def_name}
+            ln -s ${bench_dir}/${bench}/${sdc_name} ${base_name}/${sdc_name}
+
+            # write iccad file
+            iccad_file=${base_name}/${bench}.iccad
+            echo "$verilog_name $def_name $sdc_name $early_lib_name $late_lib_name $lef_name" \
+            > $iccad_file
+
+            # Run
+            cmd="./iccad2015_evaluate_solution $ICCAD_PARM $iccad_file $UTIL"
+            echo $cmd
+            $cmd | tee ${base_name}.log
+
+            # Move output files
+            rm -f uitimer.tr
+            mv ${base_name}.log ${base_name}/out
+            mv ${bench}_critical* ${base_name}/out
+            mv *.spef ${base_name}/out/${bench}.spef
+            mv *.tau2015 ${base_name}/out/${bench}.tau2015
+            mv *.timing ${base_name}/out/${bench}.timing
+            mv *.plt ${base_name}/out/${bench}.plt
+            mv check_legality.log ${base_name}/out
+        done
+	done
+done

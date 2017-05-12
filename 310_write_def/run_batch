@@ -1,0 +1,50 @@
+#!/bin/bash
+source ../000_config/config.sh
+
+bench_dir="../bench"
+logic_synth_dir="../100_logic_synthesis"
+floorplan_dir="../200_floorplanning"
+placement_dir="../300_placement"
+
+for bench in "${bench_list[@]}"
+do
+	for script in "${script_list[@]}"
+	do
+        for placer in "${placer_list[@]}"
+        do
+            base_name=${bench}_${script}_${placer}
+            aux="${floorplan_dir}/bookshelf-${bench}_${script}/${bench}.aux"
+
+            # Solution pl name
+            if test $placer = "Capo"; then
+                solution_pl="${bench}_Capo.pl"
+            elif test $placer = "NTUPlace3"; then
+                solution_pl="${bench}.ntup.pl"
+            elif test $placer = "ComPLx"; then
+                solution_pl="${bench}_FP_dp.pl"
+            elif test $placer = "mPL6"; then
+                solution_pl="${bench}-mPL.pl"
+            elif test $placer = "mPL5"; then
+                solution_pl="${bench}-mPL.pl"
+            else
+                echo "Invalid placer."
+                exit
+            fi
+            pl="${placement_dir}/${base_name}/${solution_pl}"
+            lef="${bench_dir}/${bench}/${bench}.lef"
+            def="${bench_dir}/${bench}/${bench}.def"
+            verilog="${logic_synth_dir}/${bench}_${script}/${bench}_${script}_final.v"
+            out_def=${bench}_${script}_${placer}.def
+
+            cmd="python3 ../utils/310_write_def.py --pl ${pl}"
+            cmd="$cmd --lef ${lef} --def ${def} --verilog ${verilog} --def_out ${out_def}"
+
+            echo "Write DEF"
+            echo $cmd
+            $cmd
+            echo ""
+
+
+        done
+	done
+done

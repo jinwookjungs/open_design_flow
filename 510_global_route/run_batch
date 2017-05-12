@@ -1,0 +1,97 @@
+#!/bin/bash
+bench_list=(
+"b19"
+#"vga_lcd"
+#"mgc_edit_dist" 
+#"mgc_matrix_mult" 
+#"netcard"
+#"leon2" 
+#"leon3mp" 
+)
+
+script_list=(
+"resyn"
+#"resyn2"
+#"resyn2a"
+#"resyn3"
+#"compress"
+#"compress2"
+#"resyn2rs"
+#"compress2rs"
+#"recadd3"
+)
+
+placer_list=(
+"Capo"
+#"NTUPlace3"
+#"ComPLx"
+#"mPL5"
+#"mPL6"
+)
+
+router_list=(
+#"NCTUgr"
+#"FastRoute"
+"BFG-R"
+)
+
+fp_dir="../200_floorplanning"
+place_dir="../300_placement"
+gr_bench_dir="../500_gr_bench_gen"
+
+for bench in "${bench_list[@]}"
+do
+    for script in "${script_list[@]}"
+    do
+        for placer in "${placer_list[@]}"
+        do
+            for router in "${router_list[@]}"
+            do
+                base_name=${bench}_${script}_${placer}
+                out_name=${base_name}_${router}
+
+                # Do global route
+                cmd="./run_groute.sh ${gr_bench_dir}/${base_name}.gr $router ${out_name}"
+                echo "Running: $cmd"
+                $cmd
+                echo ""
+                echo "Done."
+
+                # Evaluate
+                cmd="../utils/510_eval2008.pl ${gr_bench_dir}/${base_name}.gr ${out_name} | tee ${out_name}.eval"
+                echo "Evaluate the solution."
+                echo "$cmd"
+                ../utils/510_eval2008.pl ${gr_bench_dir}/${base_name}.gr ${out_name} | tee ${out_name}.eval
+                echo "Done."
+                echo ""
+
+                # DAC2012 bookshelf format for plot generation
+                bookshelf_out_dir="bookshelf-${out_name}"
+                aux=${bookshelf_out_dir}/${bench}.aux
+                cp -r ${fp_dir}/bookshelf-${bench}_${script} ${bookshelf_out_dir}
+                ../utils/500_gen_bookshelf_route.tcl ${gr_bench_dir}/${base_name}.gr ${bookshelf_out_dir}/${bench}.nodes
+                echo `cat ${bookshelf_out_dir}/${bench}.aux` "${bench}.route" > .${bench}.aux
+                mv .${bench}.aux ${bookshelf_out_dir}/${bench}.aux
+ 
+                # Plotting
+                solution_pl=${place_dir}/${base_name}
+                cmd="../utils/510_dac2012_evaluate_solution.pl -p ${bookshelf_out_dir}/${bench}.aux ${place_dir}/${base_name}/${bench}_solution.pl $out_name"
+                echo "Running: $cmd"
+                $cmd | tee ${out_name}.dac2012_eval
+                echo ""
+                echo "Done."
+                gnuplot ${bench}.Max_H.congestion.plt
+                gnuplot ${bench}.Max_V.congestion.plt
+
+                # Output directory
+                out_dir="gr_${out_name}"
+                if [ -d $out_dir ]; then
+                    rm -rf $out_dir
+                fi
+                mkdir ${out_dir}
+                mv ${bench}* ${out_dir}
+                mv bookshelf-${bench}* ${out_dir}
+            done
+        done
+    done
+done

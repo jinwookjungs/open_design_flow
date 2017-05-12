@@ -1,0 +1,103 @@
+#!/bin/bash
+bench_list=(
+"b19"
+"vga_lcd"
+"mgc_edit_dist" 
+#"mgc_matrix_mult" 
+#"netcard"
+#"leon2" 
+#"leon3mp" 
+)
+
+script_list=(
+"resyn"
+"resyn2"
+#"resyn2a"
+"resyn3"
+"compress"
+"compress2"
+#"resyn2rs"
+#"compress2rs"
+#"recadd3"
+)
+
+placer_list=(
+"Capo"
+"NTUPlace3"
+#"mPL6"
+#"mPL5"
+"ComPLx"
+)
+
+sizer_list=(
+"USizer"
+)
+
+bench_dir=`cd ../bench; pwd -P`
+logic_synth_dir=`cd ../100_logic_synthesis; pwd -P`
+floorplan_dir=`cd ../200_floorplanning; pwd -P`
+placement_dir=`cd ../300_placement; pwd -P`
+write_def_dir=`cd ../310_write_def; pwd -P`
+timing_dir=`cd ../320_timing; pwd -P`
+sizer_dir=`cd ../400_gate_sizing; pwd -P`
+sizer_bookshelf_dir=`cd ../410_write_bookshelf; pwd -P`
+
+clock_name='iccad_clk'
+
+# Gate library
+lib_dir=`cd ../bench/techlib; pwd -P`
+sizer_lib="${lib_dir}/open_eda_Late.lib"
+sizer_lib_name="cell.lib"
+
+for bench in "${bench_list[@]}"
+do
+    for script in "${script_list[@]}"
+    do
+        for placer in "${placer_list[@]}"
+        do
+            for sizer in "${sizer_list[@]}"
+            do
+                legalization_dir="${bench}_${script}_${placer}_${sizer}_FP"
+
+                if [ -d "$legalization_dir" ]; then
+                    rm -rf $legalization_dir
+                fi
+                mkdir ${legalization_dir}
+                cd ${legalization_dir}
+
+                bookshelf_base_dir="${floorplan_dir}/bookshelf-${bench}_${script}"
+                ln -s ${bookshelf_base_dir}/${bench}.aux
+                ln -s ${bookshelf_base_dir}/${bench}.nets
+                ln -s ${bookshelf_base_dir}/${bench}.scl
+                ln -s ${bookshelf_base_dir}/${bench}.shapes
+                ln -s ${bookshelf_base_dir}/${bench}.wts
+
+                # Placement result
+                bookshelf_pl="${placement_dir}/${bench}_${script}_${placer}/${bench}_solution.pl"
+                ln -s ${bookshelf_pl} ${bench}.pl
+
+                # Sizing result (bookshelf nodes file)
+                sizer_bookshelf="${sizer_bookshelf_dir}/${bench}_${script}_${placer}_${sizer}.nodes"
+                ln -s ${sizer_bookshelf} ${bench}.nodes
+
+                # Legalization using FastPlace3.0
+                cmd="../../bin/FastPlace3.0_Linux64_DP -legalize -noDp"
+                cmd="$cmd . ${bench}.aux . ${bench}.pl"
+                echo $cmd
+                $cmd
+
+                # Plotting
+                cmd="python3 ../../utils/300_placement_plotter.py"
+                cmd="$cmd --nodes ${bench}.nodes"
+                cmd="$cmd --pl ${bench}_FP_lg.pl"
+                cmd="$cmd --scl ${bench}.scl"
+                echo $cmd
+                $cmd
+                gnuplot out.plt
+                mv out.png ${bench}_${script}_${placer}_${sizer}.png
+                cd ../
+            done
+        done
+    done
+done
+

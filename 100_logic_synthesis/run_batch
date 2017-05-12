@@ -1,0 +1,24 @@
+#!/bin/bash
+source ../000_config/config.sh
+
+echo ""
+echo "================================================================================"
+echo "            __             _       ____          __  __           _   "
+echo "           / /  ___  ___ _(_)___  / __/_ _____  / /_/ /  ___ ___ (_)__"
+echo "          / /__/ _ \/ _ \/ / __/ _\ \/ // / _ \/ __/ _ \/ -_|_-</ (_-<"
+echo "         /____/\___/\_, /_/\__/ /___/\_, /_//_/\__/_//_/\__/___/_/___/"
+echo "                   /___/            /___/                             "
+echo ""
+echo "================================================================================"
+echo ""
+
+for bench in "${bench_list[@]}"
+do
+	for script in "${script_list[@]}"
+	do
+		./run_abc.sh $bench $script $max_fo | tee ${bench}_${script}.log
+	done
+done
+
+# for the time being, I changed permission of files from this script:
+chmod 770 *

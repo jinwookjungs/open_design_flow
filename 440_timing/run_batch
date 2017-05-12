@@ -1,0 +1,113 @@
+#!/bin/bash
+bench_list=(
+"b19"
+#"vga_lcd"
+#"mgc_edit_dist" 
+#"mgc_matrix_mult" 
+#"netcard"
+#"leon2" 
+#"leon3mp" 
+)
+
+script_list=(
+"resyn"
+#"resyn2"
+#"resyn2a"
+#"resyn3"
+#"compress"
+#"compress2"
+#"resyn2rs"
+#"compress2rs"
+#"recadd3"
+)
+
+placer_list=(
+#"Capo"
+#"NTUPlace3"
+"ComPLx"
+#"mPL5"
+#"mPL6"
+)
+
+sizer_list=(
+"USizer"
+)
+
+bench_dir=`cd ../bench; pwd -P`
+logic_synth_dir=`cd ../100_logic_synthesis; pwd -P`
+floorplan_dir=`cd ../200_floorplanning; pwd -P`
+placement_dir=`cd ../300_placement; pwd -P`
+write_def_dir=`cd ../310_write_def; pwd -P`
+timing_dir=`cd ../320_timing; pwd -P`
+sizer_dir=`cd ../400_gate_sizing; pwd -P`
+sizer_bookshelf_dir=`cd ../410_write_bookshelf; pwd -P`
+sizer_legalization_dir=`cd ../420_legalization; pwd -P`
+sizer_def_dir=`cd ../430_write_def; pwd -P`
+
+ICCAD_PARM='ICCAD15.parm'
+UTIL=0.7
+
+# Name used in ICCAD file
+
+for bench in "${bench_list[@]}"
+do
+    early_lib_name="${bench}_Early.lib"
+    late_lib_name="${bench}_Late.lib"
+    lef_name="${bench}.lef"
+
+    early_lib="${bench_dir}/${bench}/${early_lib_name}"
+    late_lib="${bench_dir}/${bench}/${late_lib_name}"
+    lef="${bench_dir}/${bench}/${lef_name}"
+	for script in "${script_list[@]}"
+	do
+        for placer in "${placer_list[@]}"
+        do
+            for sizer in "${sizer_list[@]}"
+            do
+                base_name=${bench}_${script}_${placer}_${sizer}
+                output_dir=${base_name}
+                
+                if [ -d ${base_name} ]; then
+                    rm -rf ${base_name}
+                fi
+                mkdir -p ${base_name}/out
+
+                # library
+                ln -s $early_lib ${base_name}/$early_lib_name
+                ln -s $late_lib ${base_name}/$late_lib_name
+                ln -s $lef ${base_name}/$lef_name
+
+                # Design
+                # verilog_name=${bench}_${script}_final.v
+                verilog_name="${sizer_dir}/${base_name}/${base_name}.v"
+                def_name=${base_name}.def
+                sdc_name=${bench}.sdc
+        
+                # Path
+                ln -s ${verilog_name} ${output_dir}/${bench}.v
+                ln -s ${sizer_def_dir}/${base_name}_FP/${base_name}.def ${output_dir}/${def_name}
+                ln -s ${bench_dir}/${bench}/${sdc_name} ${output_dir}/${sdc_name}
+
+                # write iccad file
+                iccad_file=${output_dir}/${bench}.iccad
+                echo "${bench}.v $def_name $sdc_name $early_lib_name $late_lib_name $lef_name" \
+                > $iccad_file
+
+                # Run
+                cmd="./iccad2015_evaluate_solution $ICCAD_PARM $iccad_file $UTIL"
+                echo $cmd
+                $cmd | tee ${base_name}.log
+
+                # Move output files
+                rm -f uitimer.tr
+                mv ${base_name}.log ${base_name}/out
+                mv ${bench}_critical* ${base_name}/out
+                mv *.spef ${base_name}/out
+                mv *.tau2015 ${base_name}/out
+                mv *.timing ${base_name}/out
+                mv *.plt ${base_name}/out
+                mv check_legality.log ${base_name}/out
+            done
+        done
+	done
+done

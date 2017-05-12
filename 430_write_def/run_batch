@@ -1,0 +1,110 @@
+#!/bin/bash
+bench_list=(
+"b19"
+#"vga_lcd"
+#"mgc_edit_dist" 
+#"mgc_matrix_mult" 
+#"netcard"
+#"leon2" 
+#"leon3mp" 
+)
+
+script_list=(
+"resyn"
+#"resyn2"
+#"resyn2a"
+#"resyn3"
+#"compress"
+#"compress2"
+#"resyn2rs"
+#"compress2rs"
+#"recadd3"
+)
+
+placer_list=(
+#"Capo"
+#"NTUPlace3"
+#"mPL6"
+#"mPL5"
+"ComPLx"
+)
+
+sizer_list=(
+"USizer"
+)
+
+bench_dir=`cd ../bench; pwd -P`
+logic_synth_dir=`cd ../100_logic_synthesis; pwd -P`
+floorplan_dir=`cd ../200_floorplanning; pwd -P`
+placement_dir=`cd ../300_placement; pwd -P`
+write_def_dir=`cd ../310_write_def; pwd -P`
+timing_dir=`cd ../320_timing; pwd -P`
+sizer_dir=`cd ../400_gate_sizing; pwd -P`
+sizer_bookshelf_dir=`cd ../410_write_bookshelf; pwd -P`
+sizer_legalization_dir=`cd ../420_legalization; pwd -P`
+
+clock_name='iccad_clk'
+
+# Gate library
+lib_dir=`cd ../bench/techlib; pwd -P`
+sizer_lib="${lib_dir}/open_eda_Late.lib"
+sizer_lib_name="cell.lib"
+
+for bench in "${bench_list[@]}"
+do
+    for script in "${script_list[@]}"
+    do
+        for placer in "${placer_list[@]}"
+        do
+            for sizer in "${sizer_list[@]}"
+            do
+                write_def_dir="${bench}_${script}_${placer}_${sizer}_FP"
+                if [ -d "$write_def_dir" ]; then
+                    rm -rf $write_def_dir
+                fi
+                mkdir $write_def_dir
+                cd $write_def_dir
+
+                bookshelf_base_dir="${floorplan_dir}/bookshelf-${bench}_${script}"
+                ln -s ${bookshelf_base_dir}/${bench}.aux
+                ln -s ${bookshelf_base_dir}/${bench}.nets
+                ln -s ${bookshelf_base_dir}/${bench}.scl
+                ln -s ${bookshelf_base_dir}/${bench}.shapes
+                ln -s ${bookshelf_base_dir}/${bench}.wts
+
+                # Legalization result
+                bookshelf_pl="${sizer_legalization_dir}/${bench}_${script}_${placer}_${sizer}_FP/${bench}_FP_lg.pl"
+                ln -s ${bookshelf_pl} ${bench}.pl
+
+                # Sizing result (bookshelf nodes file)
+                sizer_bookshelf="${sizer_bookshelf_dir}/${bench}_${script}_${placer}_${sizer}.nodes"
+                ln -s ${sizer_bookshelf} ${bench}.nodes
+
+                # LEF
+                lef="${bench_dir}/${bench}/${bench}.lef"
+                ln -s ${lef}
+
+                # DEF
+                def="${bench_dir}/${bench}/${bench}.def"
+                ln -s ${def}
+
+                # Verilog (sizing output)
+                sizing_output_base_name="${bench}_${script}_${placer}_${sizer}"
+                sizing_output="${sizer_dir}/${sizing_output_base_name}/${sizing_output_base_name}.v"
+                ln -s ${sizing_output} ${bench}_sizer.v
+
+                out_def=${bench}_${script}_${placer}_${sizer}.def
+                # Write DEF file
+                cmd="python3 ../../utils/310_write_def.py"
+                cmd="$cmd --pl ${bench}.pl"
+                cmd="$cmd --lef ${bench}.lef"
+                cmd="$cmd --def ${bench}.def"
+                cmd="$cmd --verilog ${bench}_sizer.v"
+                cmd="$cmd --def_out ${out_def}"
+                echo $cmd
+                $cmd
+            done
+        done
+    done
+done
+

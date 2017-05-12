@@ -1,0 +1,85 @@
+#!/bin/bash
+bench_list=(
+"b19"
+"vga_lcd"
+"mgc_edit_dist" 
+"mgc_matrix_mult" 
+"netcard"
+"leon2" 
+"leon3mp" 
+)
+
+script_list=(
+"resyn"
+"resyn2"
+#"resyn2a"
+"resyn3"
+"compress"
+"compress2"
+#"resyn2rs"
+#"compress2rs"
+#"recadd3"
+)
+
+placer_list=(
+#"Capo"
+#"NTUPlace3"
+#"ComPLx"
+"mPL5"
+"mPL6"
+)
+
+floorplan_dir="../200_floorplanning"
+placement_dir="../300_placement"
+out_gr=""
+
+tile_size="30"  # 30-50 wire tracks
+adjustment="20" # 20% of available wire tracks: block porosity
+safety="90"     # 90-100% of tile size: guardband
+mode="3"
+num_layer="6"
+
+for bench in "${bench_list[@]}"
+do
+    for script in "${script_list[@]}"
+    do
+        for placer in "${placer_list[@]}"
+        do
+            out_name=${bench}_${script}_${placer}
+            out_dir=$out_name
+
+            # Solution pl name
+            if test $placer = "Capo"; then
+                solution_pl="${bench}_Capo.pl"
+            elif test $placer = "NTUPlace3"; then
+                solution_pl="${bench}.ntup.pl"
+            elif test $placer = "ComPLx"; then
+                solution_pl="${bench}_FP_dp.pl"
+            elif test $placer = "mPL6"; then
+                solution_pl="${bench}-mPL.pl"
+            elif test $placer = "mPL5"; then
+                solution_pl="${bench}-mPL.pl"
+            else
+                echo "Invalid placer."
+                exit
+            fi
+
+            echo "Run: gen_routing_benchmark.pl"
+            echo "Output: ${out_name}.gr"
+            echo "Log: ${out_name}.log"
+            bookshelf_dir=${floorplan_dir}/bookshelf-${bench}_${script}
+            perl ../utils/500_gen_routing_benchmark.pl ${bookshelf_dir}/${bench}.nodes \
+                                                ${placement_dir}/${out_dir}/${solution_pl} \
+                                                ${bookshelf_dir}/${bench}.nets \
+                                                ${bookshelf_dir}/${bench}.scl ${out_name}.gr \
+                                                $tile_size $adjustment $safety $mode $num_layer \
+                                                | tee ${out_name}.log
+
+            # generarte bookshelf .route file
+            ../utils/500_gen_bookshelf_route.tcl ${out_name}.gr ${bookshelf_dir}/${bench}.nodes
+
+            echo "Done."
+            echo ""
+        done
+    done
+done

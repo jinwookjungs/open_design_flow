@@ -1,0 +1,24 @@
+#!/bin/bash
+source ../000_config/config.sh
+
+fp_dir="../200_floorplanning"
+
+echo ""
+echo "================================================================================"
+echo "                                  PLACEMENT "
+echo "================================================================================"
+echo ""
+
+for bench in "${bench_list[@]}"
+do
+	for script in "${script_list[@]}"
+	do
+        for placer in "${placer_list[@]}"
+        do
+            source ~/.bashrc
+            bookshelf_dir=${fp_dir}/bookshelf-${bench}_${script}
+            out_dir=${bench}_${script}_${placer}
+            ./run_place.sh ${bench} ${bookshelf_dir} $placer $out_dir
+        done
+	done
+done
