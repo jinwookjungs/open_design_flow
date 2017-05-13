@@ -31,8 +31,8 @@ do
             for sizer in "${sizer_list[@]}"
             do
 
-		base_name=${bench}_${script}_${placer}_${sizer}
-		log=${base_name}.log.txt
+                base_name=${bench}_${script}_${placer}_${sizer}
+                log=${base_name}.log.txt
 
                 legalization_dir="${bench}_${script}_${placer}_${sizer}_FP"
 
