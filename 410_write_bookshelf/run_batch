@@ -27,23 +27,20 @@ do
     do
         for placer in "${placer_list[@]}"
         do
-            for sizer in "${sizer_list[@]}"
-            do
-                input_bookshelf_nodes=${floorplan_dir}/bookshelf-${bench}_${script}/${bench}.nodes
-                sizing_output_dir=${sizer_dir}/${bench}_${script}_${placer}_${sizer}
-                sizing_output_verilog=${sizing_output_dir}/${bench}_${script}_${placer}_${sizer}.v
-                lef=${bench_dir}/${bench}/${bench}.lef
+            input_bookshelf_nodes=${floorplan_dir}/bookshelf-${bench}_${script}/${bench}.nodes
+            sizing_output_dir=${sizer_dir}/${bench}_${script}_${placer}_${sizer}
+            sizing_output_verilog=${sizing_output_dir}/${bench}_${script}_${placer}_${sizer}.v
+            lef=${bench_dir}/${bench}/${bench}.lef
 
-                output_bookshelf_nodes=${bench}_${script}_${placer}_${sizer}.nodes
-                cmd="python3 ../utils/410_create_bookshelf_nodes_after_sizing.py"
-                cmd="$cmd --bs_nodes ${input_bookshelf_nodes}"
-                cmd="$cmd --verilog ${sizing_output_verilog}"
-                cmd="$cmd --lef ${lef}"
-                cmd="$cmd -o ${output_bookshelf_nodes}"
+            output_bookshelf_nodes=${bench}_${script}_${placer}_${sizer}.nodes
+            cmd="python3 ../utils/410_create_bookshelf_nodes_after_sizing.py"
+            cmd="$cmd --bs_nodes ${input_bookshelf_nodes}"
+            cmd="$cmd --verilog ${sizing_output_verilog}"
+            cmd="$cmd --lef ${lef}"
+            cmd="$cmd -o ${output_bookshelf_nodes}"
 
-                echo $cmd
-                $cmd
-            done
+            echo $cmd
+            $cmd
         done
     done
 done

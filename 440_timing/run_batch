@@ -35,60 +35,57 @@ do
 	do
         for placer in "${placer_list[@]}"
         do
-            for sizer in "${sizer_list[@]}"
-            do
-                base_name=${bench}_${script}_${placer}_${sizer}
-                output_dir=${base_name}
-                
-                if [ -d ${base_name} ]; then
-                    rm -rf ${base_name}
-                fi
-                mkdir -p ${base_name}/out
+            base_name=${bench}_${script}_${placer}_${sizer}
+            output_dir=${base_name}
+            
+            if [ -d ${base_name} ]; then
+                rm -rf ${base_name}
+            fi
+            mkdir -p ${base_name}/out
 
-                # library
-                ln -s $early_lib ${base_name}/$early_lib_name
-                ln -s $late_lib ${base_name}/$late_lib_name
-                ln -s $lef ${base_name}/$lef_name
+            # library
+            ln -s $early_lib ${base_name}/$early_lib_name
+            ln -s $late_lib ${base_name}/$late_lib_name
+            ln -s $lef ${base_name}/$lef_name
 
-                # Design
-                # verilog_name=${bench}_${script}_final.v
-                verilog_name="${sizer_dir}/${base_name}/${base_name}.v"
-                def_name=${base_name}.def
-                sdc_name=${bench}.sdc
-        
-                # Path
-                ln -s ${verilog_name} ${output_dir}/${bench}.v
-                ln -s ${sizer_def_dir}/${base_name}_FP/${base_name}.def ${output_dir}/${def_name}
-                ln -s ${bench_dir}/${bench}/${sdc_name} ${output_dir}/${sdc_name}
+            # Design
+            # verilog_name=${bench}_${script}_final.v
+            verilog_name="${sizer_dir}/${base_name}/${base_name}.v"
+            def_name=${base_name}.def
+            sdc_name=${bench}.sdc
+    
+            # Path
+            ln -s ${verilog_name} ${output_dir}/${bench}.v
+            ln -s ${sizer_def_dir}/${base_name}_FP/${base_name}.def ${output_dir}/${def_name}
+            ln -s ${bench_dir}/${bench}/${sdc_name} ${output_dir}/${sdc_name}
 
-                # write iccad file
-                iccad_file=${output_dir}/${bench}.iccad
-                echo "${bench}.v $def_name $sdc_name $early_lib_name $late_lib_name $lef_name" \
-                > $iccad_file
+            # write iccad file
+            iccad_file=${output_dir}/${bench}.iccad
+            echo "${bench}.v $def_name $sdc_name $early_lib_name $late_lib_name $lef_name" \
+            > $iccad_file
 
-                # Run
-                cmd="./iccad2015_evaluate_solution $ICCAD_PARM $iccad_file $UTIL"
-                echo $cmd
-                $cmd | tee ${base_name}.log.txt
+            # Run
+            cmd="./iccad2015_evaluate_solution $ICCAD_PARM $iccad_file $UTIL"
+            echo $cmd
+            $cmd | tee ${base_name}.log.txt
 
-                # Move output files
-                rm -f uitimer.tr
+            # Move output files
+            rm -f uitimer.tr
 
 #                gnuplot ${bench}_critical.plt
-                gnuplot ${bench}_grid.plt
-                mv *.png ${base_name}/out
+            gnuplot ${bench}_grid.plt
+            mv *.png ${base_name}/out
 
-                mv ${base_name}.log.txt ${base_name}/out
-                mv ${bench}_critical.log ${base_name}/out
-                mv ${bench}_critical.plt ${base_name}/out
-                mv *.spef ${base_name}/out
-                mv *.tau2015 ${base_name}/out
-                mv *.timing ${base_name}/out
-                mv ${bench}_grid.plt ${base_name}/out
-                if [ -f check_legality.log ]; then
-                    mv check_legality.log ${base_name}/out
-                fi
-            done
+            mv ${base_name}.log.txt ${base_name}/out
+            mv ${bench}_critical.log ${base_name}/out
+            mv ${bench}_critical.plt ${base_name}/out
+            mv *.spef ${base_name}/out
+            mv *.tau2015 ${base_name}/out
+            mv *.timing ${base_name}/out
+            mv ${bench}_grid.plt ${base_name}/out
+            if [ -f check_legality.log ]; then
+                mv check_legality.log ${base_name}/out
+            fi
         done
 	done
 done

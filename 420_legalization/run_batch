@@ -28,54 +28,50 @@ do
     do
         for placer in "${placer_list[@]}"
         do
-            for sizer in "${sizer_list[@]}"
-            do
+            base_name=${bench}_${script}_${placer}_${sizer}
+            log=${base_name}.log.txt
 
-                base_name=${bench}_${script}_${placer}_${sizer}
-                log=${base_name}.log.txt
+            legalization_dir="${bench}_${script}_${placer}_${sizer}_FP"
 
-                legalization_dir="${bench}_${script}_${placer}_${sizer}_FP"
+            if [ -d "$legalization_dir" ]; then
+                rm -rf $legalization_dir
+            fi
+            mkdir ${legalization_dir}
+            cd ${legalization_dir}
 
-                if [ -d "$legalization_dir" ]; then
-                    rm -rf $legalization_dir
-                fi
-                mkdir ${legalization_dir}
-                cd ${legalization_dir}
+            bookshelf_base_dir="${floorplan_dir}/bookshelf-${bench}_${script}"
+            ln -s ${bookshelf_base_dir}/${bench}.aux
+            ln -s ${bookshelf_base_dir}/${bench}.nets
+            ln -s ${bookshelf_base_dir}/${bench}.scl
+            ln -s ${bookshelf_base_dir}/${bench}.shapes
+            ln -s ${bookshelf_base_dir}/${bench}.wts
 
-                bookshelf_base_dir="${floorplan_dir}/bookshelf-${bench}_${script}"
-                ln -s ${bookshelf_base_dir}/${bench}.aux
-                ln -s ${bookshelf_base_dir}/${bench}.nets
-                ln -s ${bookshelf_base_dir}/${bench}.scl
-                ln -s ${bookshelf_base_dir}/${bench}.shapes
-                ln -s ${bookshelf_base_dir}/${bench}.wts
+            # Placement result
+            bookshelf_pl="${placement_dir}/${bench}_${script}_${placer}/${bench}_solution.pl"
+            ln -s ${bookshelf_pl} ${bench}.pl
 
-                # Placement result
-                bookshelf_pl="${placement_dir}/${bench}_${script}_${placer}/${bench}_solution.pl"
-                ln -s ${bookshelf_pl} ${bench}.pl
+            # Sizing result (bookshelf nodes file)
+            sizer_bookshelf="${sizer_bookshelf_dir}/${bench}_${script}_${placer}_${sizer}.nodes"
+            ln -s ${sizer_bookshelf} ${bench}.nodes
 
-                # Sizing result (bookshelf nodes file)
-                sizer_bookshelf="${sizer_bookshelf_dir}/${bench}_${script}_${placer}_${sizer}.nodes"
-                ln -s ${sizer_bookshelf} ${bench}.nodes
+            # Legalization using FastPlace3.0
+            cmd="../../bin/FastPlace3.0_Linux64_DP -legalize -noDp"
+            cmd="$cmd . ${bench}.aux . ${bench}.pl"
+            echo $cmd
+            eval $cmd | tee ${log}
 
-                # Legalization using FastPlace3.0
-                cmd="../../bin/FastPlace3.0_Linux64_DP -legalize -noDp"
-                cmd="$cmd . ${bench}.aux . ${bench}.pl"
-                echo $cmd
-                eval $cmd | tee ${log}
-
-                # Plotting
-                cmd="python3 ../../utils/300_placement_plotter.py"
-                cmd="$cmd --nodes ${bench}.nodes"
-                cmd="$cmd --pl ${bench}_FP_lg.pl"
-                cmd="$cmd --scl ${bench}.scl"
-                echo $cmd
-                $cmd
-                gnuplot out.plt
-                mv out.plt ${bench}_${script}_${placer}_${sizer}.plt
-                mv out.png ${bench}_${script}_${placer}_${sizer}.png
-                gzip *.plt
-                cd ../
-            done
+            # Plotting
+            cmd="python3 ../../utils/300_placement_plotter.py"
+            cmd="$cmd --nodes ${bench}.nodes"
+            cmd="$cmd --pl ${bench}_FP_lg.pl"
+            cmd="$cmd --scl ${bench}.scl"
+            echo $cmd
+            $cmd
+            gnuplot out.plt
+            mv out.plt ${bench}_${script}_${placer}_${sizer}.plt
+            mv out.png ${bench}_${script}_${placer}_${sizer}.png
+            gzip *.plt
+            cd ../
         done
     done
 done
