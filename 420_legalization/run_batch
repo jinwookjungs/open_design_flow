@@ -70,7 +70,9 @@ do
                 echo $cmd
                 $cmd
                 gnuplot out.plt
+                mv out.plt ${bench}_${script}_${placer}_${sizer}.plt
                 mv out.png ${bench}_${script}_${placer}_${sizer}.png
+                gzip *.plt
                 cd ../
             done
         done
