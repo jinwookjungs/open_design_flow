@@ -113,9 +113,9 @@ Jinwook Jung, Iris Hui-Ru Jiang, Gi-Joon Nam, Victor N. Kravets, Laleh Behjat, a
 
 ## Authors
 * [**Jinwook Jung**](mailto:jinwookjungs@gmail.com) - [KAIST](http://dtlab.kaist.ac.kr)
-* **Gi-Joon Nam**
 
 ## Advisors
+* **Gi-Joon Nam**
 * Iris Hui-Ru Jiang
 * Victor N. Kravets
 * Laleh Behjat
