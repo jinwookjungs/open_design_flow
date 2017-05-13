@@ -22,9 +22,6 @@ lib_dir=`cd ../bench/techlib; pwd -P`
 sizer_lib="${lib_dir}/open_eda_Late.lib"
 sizer_lib_name="cell.lib"
 
-base_name=${bench}_${script}_${placer}_${sizer}
-log=${base_name}.log.txt
-
 for bench in "${bench_list[@]}"
 do
     for script in "${script_list[@]}"
@@ -33,6 +30,10 @@ do
         do
             for sizer in "${sizer_list[@]}"
             do
+
+		base_name=${bench}_${script}_${placer}_${sizer}
+		log=${base_name}.log.txt
+
                 legalization_dir="${bench}_${script}_${placer}_${sizer}_FP"
 
                 if [ -d "$legalization_dir" ]; then
