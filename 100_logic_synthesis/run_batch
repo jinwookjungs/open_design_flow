@@ -21,4 +21,4 @@ do
 done
 
 # for the time being, I changed permission of files from this script:
-chmod 770 *
+chmod 774 *

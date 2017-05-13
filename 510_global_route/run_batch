@@ -46,8 +46,11 @@ do
                 $cmd | tee ${out_name}.dac2012_eval
                 echo ""
                 echo "Done."
-                gnuplot ${bench}.Max_H.congestion.plt
-                gnuplot ${bench}.Max_V.congestion.plt
+
+                for f in *.plt
+                do
+                    gnuplot $f; gzip $f
+                done
 
                 # Output directory
                 out_dir="gr_${out_name}"
