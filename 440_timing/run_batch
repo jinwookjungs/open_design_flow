@@ -74,8 +74,8 @@ do
                 # Move output files
                 rm -f uitimer.tr
 
-                gnuplot ${bench}_critical.plt
-                gnuplot ${bench}.plt
+#                gnuplot ${bench}_critical.plt
+                gnuplot ${bench}_grid.plt
                 mv *.png ${base_name}/out
 
                 mv ${base_name}.log.txt ${base_name}/out
@@ -84,7 +84,7 @@ do
                 mv *.spef ${base_name}/out
                 mv *.tau2015 ${base_name}/out
                 mv *.timing ${base_name}/out
-                mv *.plt ${base_name}/out
+                mv ${bench}_grid.plt ${base_name}/out
                 if [ -f check_legality.log ]; then
                     mv check_legality.log ${base_name}/out
                 fi
