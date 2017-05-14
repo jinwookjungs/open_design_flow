@@ -55,8 +55,10 @@ do
             if test $run_gs = false; then
                 bookshelf_pl="${placement_dir}/${out_dir}/${solution_pl}"
             else
-                bookshelf_pl="${sizing_dir}/${bench}_${script}_${placer}_${sizer}_FP/${bench}_FP_lg.pl"
+                bookshelf_pl="${sizing_dir}/${bench}_${script}_${placer}_${sizer}_FP/${bench}_FP_dp.pl"
             fi
+
+            echo "Placement file: $bookshelf_pl"
 
             bookshelf_dir=${floorplan_dir}/bookshelf-${bench}_${script}
             perl ../utils/500_gen_routing_benchmark.pl ${bookshelf_dir}/${bench}.nodes \
@@ -67,7 +69,9 @@ do
                                                 | tee ${out_name}.log.txt
 
             # generarte bookshelf .route file
-            ../utils/500_gen_bookshelf_route.tcl ${out_name}.gr ${bookshelf_dir}/${bench}.nodes
+            cmd="../utils/500_gen_bookshelf_route.tcl ${out_name}.gr ${bookshelf_dir}/${bench}.nodes"
+            echo $cmd
+            $cmd
 
             echo "Done."
             echo ""

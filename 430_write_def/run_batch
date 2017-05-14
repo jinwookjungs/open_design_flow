@@ -44,7 +44,7 @@ do
             ln -s ${bookshelf_base_dir}/${bench}.wts
 
             # Legalization result
-            bookshelf_pl="${sizer_legalization_dir}/${bench}_${script}_${placer}_${sizer}_FP/${bench}_FP_lg.pl"
+            bookshelf_pl="${sizer_legalization_dir}/${bench}_${script}_${placer}_${sizer}_FP/${bench}_FP_dp.pl"
             ln -s ${bookshelf_pl} ${bench}.pl
 
             # Sizing result (bookshelf nodes file)

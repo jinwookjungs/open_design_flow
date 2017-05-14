@@ -1,0 +1,75 @@
+================================================================================
+    ICCAD 2015 Incremental Timing-Driven Placement Contest Evaluation Script    
+    Authors : Myung-Chul Kim, Jin Hu {mckima, jinhu}@us.ibm.com                 
+================================================================================
+Command line : 
+ ./iccad2015_evaluate_solution ICCAD15.parm b19_resyn2_ComPLx_USizer/b19.iccad 0.7
+
+Reading parameter file ..
+-------------------------------------------------------------------------------
+  LOCAL_WIRE_RESISTANCE   : 2.535 Ohm/um
+  LOCAL_WIRE_CAPACITANCE  : 1.6e-16 Farad/um
+  MAX_WIRE_SEGMENT_LENGTH : 100 um
+  MAX_LCB_FANOUTS         : 50
+-------------------------------------------------------------------------------
+
+Reading .iccad2015 file ..
+-------------------------------------------------------------------------------
+  benchmark name  : b19
+  directory       : b19_resyn2_ComPLx_USizer/
+  .iccad2015 file : b19_resyn2_ComPLx_USizer/b19.iccad
+-------------------------------------------------------------------------------
+  directory       : b19_resyn2_ComPLx_USizer/
+  early .lib file : b19_resyn2_ComPLx_USizer/b19_Early.lib
+  late  .lib file : b19_resyn2_ComPLx_USizer/b19_Late.lib
+  .lef file       : b19_resyn2_ComPLx_USizer/b19.lef
+  .v file         : b19_resyn2_ComPLx_USizer/b19.v
+  .sdc file       : b19_resyn2_ComPLx_USizer/b19.sdc
+  .def file       : b19_resyn2_ComPLx_USizer/b19_resyn2_ComPLx_USizer.def
+-------------------------------------------------------------------------------
+  total cells     : 131966
+  total nets      : 131988
+  design area     : 2.82808e+12
+  total f_area    : 0
+  total m_area    : 1.52818e+12
+  design util     : 0.540359
+  num rows        : 492
+  row height      : 3420
+--------------------------------------------------------------------------------
+
+Evaluating the solution file ..                                                 
+--------------------------------------------------------------------------------
+Analyzing placement .. 
+  max displ. (um) : 0
+  numBins         : 3025 ( 55 x 55 )
+  bin dimension   : 30780 x 30780
+  target util     : 0.7
+  ABU_2,5,10,20   : 0.98197, 0.976935, 0.971595, 0.963032
+  ABU penalty     : 0.397787
+  alpha           : 1
+
+Analyzing timing .. 
+  measure HPWL
+  measure HPWL done.
+  FLUTE: Total 98762 internal Steiner points are found.
+  Slicing wire segments: 404041 --> 404951 ( < 100 um )
+Init timer.
+Init timer done.
+vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+  HPWL, StWL (um) : 1.92205e+06, 2.18909e+06
+  Scaled StWL     : 3.05988e+06 ( 39.7787% )
+  Clock period    : 5869
+  early WNS, TNS  : 0, 0
+  late  WNS, TNS  : 0, 0
+--------------------------------------------------------------------------------
+
+Checking legality .. 
+--------------------------------------------------------------------------------
+  Testing ILLEGAL_TYPE 1 .. 0
+  Testing ILLEGAL_TYPE 2 .. 0
+  Testing ILLEGAL_TYPE 3 .. 0
+  Testing ILLEGAL_TYPE 4 .. 0
+  Testing ILLEGAL_TYPE 5 .. 0
+  Testing ILLEGAL_TYPE 6 .. 0
+Placement is LEGAL.
+--------------------------------------------------------------------------------

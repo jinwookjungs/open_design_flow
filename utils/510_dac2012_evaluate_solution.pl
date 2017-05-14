@@ -1404,7 +1404,7 @@ sub read_routing_solution {
     if(($ref_NetDB->{net_record}{$net_name}{gr_net} == 1) && 
        ($ref_NetDB->{net_record}{$net_name}{is_routed} == 0))
     {
-      print "ERROR: Net($net_name) spans g-cells but is not routed.\n";
+        # print "ERROR: Net($net_name) spans g-cells but is not routed.\n";
     }
   }
   

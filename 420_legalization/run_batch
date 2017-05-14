@@ -55,7 +55,7 @@ do
             ln -s ${sizer_bookshelf} ${bench}.nodes
 
             # Legalization using FastPlace3.0
-            cmd="../../bin/FastPlace3.0_Linux64_DP -legalize -noDp"
+            cmd="../../bin/FastPlace3.0_Linux64_DP -legalize -fast"
             cmd="$cmd . ${bench}.aux . ${bench}.pl"
             echo $cmd
             eval $cmd | tee ${log}
@@ -63,7 +63,7 @@ do
             # Plotting
             cmd="python3 ../../utils/300_placement_plotter.py"
             cmd="$cmd --nodes ${bench}.nodes"
-            cmd="$cmd --pl ${bench}_FP_lg.pl"
+            cmd="$cmd --pl ${bench}_FP_dp.pl"
             cmd="$cmd --scl ${bench}.scl"
             echo $cmd
             $cmd
