@@ -77,7 +77,9 @@ do
             mv *.tau2015 ${base_name}/out
             mv *.timing ${base_name}/out
             mv *.plt ${base_name}/out
-            mv check_legality.log ${base_name}/out
+            if [ -f check_legality.log ]; then
+                mv check_legality.log ${base_name}/out
+            fi
         done
 	done
 done
