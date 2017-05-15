@@ -70,7 +70,7 @@ elif test "$placer" = "NTUPlace3"; then
 #------------------------------------------------------------------------------
 elif test "$placer" = "ComPLx"; then
 
-    cmd="${bin_dir}/ComPLx.exe -f ${bookshelf_dir}/${bench}.aux"
+    cmd="${bin_dir}/ComPLx.exe -f ${bookshelf_dir}/${bench}.aux -ut 0.9"
     echo $cmd
     eval $cmd | tee ${log}
 
