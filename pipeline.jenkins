@@ -2,23 +2,22 @@
 
 pipeline {
     agent any
-
     environment {
-        open_design_flow_dir = "/var/lib/jenkins/open_design_flow/"
-            log_dir      = "/var/lib/jenkins/jobs/OpenDesign\\ Flow/builds/${BUILD_ID}"
-            log_name     = "open_design_flow.log.txt"
-            result_dir_name = "${BUILD_ID}_${params.design}_${params.synth_script}_${params.placer}_${params.router}"
-            result_dir   = "/usr/share/nginx/html/open_design_flow/${result_dir_name}"
-            synth_name   = "${params.design}_${params.synth_script}"
-            place_name   = "${params.design}_${params.synth_script}_${params.placer}"
-            sizing_name  = "${params.design}_${params.synth_script}_${params.placer}_${params.gate_sizer}"
-            routing_name = "${params.design}_${params.synth_script}_${params.placer}_${params.router}"
+        datc_rdf_dir = "/opt/datc_rdf"
+        log_dir      = "/var/lib/jenkins/jobs/DATC\\ Robust\\ Design\\ Flow/builds/${BUILD_ID}"
+        log_name     = "datc_rdf.log.txt"
+        result_dir_name = "${BUILD_ID}_${params.design}_${params.synth_script}_${params.placer}_${params.router}"
+        result_dir   = "/usr/share/nginx/html/datc_rdf/${result_dir_name}"
+        synth_name   = "${params.design}_${params.synth_script}"
+        place_name   = "${params.design}_${params.synth_script}_${params.placer}"
+        sizing_name  = "${params.design}_${params.synth_script}_${params.placer}_${params.gate_sizer}"
+        routing_name = "${params.design}_${params.synth_script}_${params.placer}_${params.router}"
     }
     stages {
         stage("Configuration") {
             steps {
                 echo ""
-                    echo "OpenDesign Flow Database"
+                    echo "DATC Robust Design Flow"
                     echo ""
                     echo "----------------------------------------------------------"
                     echo "Design: ${params.design}"
@@ -33,7 +32,7 @@ pipeline {
                     echo "    Tile size           : ${params.tile_size}"
                     echo "    Block porosity      : ${params.adjustment}"
                     echo "    Safety margin       : ${params.safety}"
-                    echo "Results URL             : https://<open_design_flow_web_page>/${result_dir_name}"
+                    echo "Results URL             : https://rdf.kaist.ac.kr/${result_dir_name}"
                     echo "----------------------------------------------------------"
                     echo ""
                     echo "Generating config.sh..."
@@ -41,16 +40,16 @@ pipeline {
                     bench_list=(\"${params.design}\")
                     script_list=(\"${params.synth_script}\")
                     max_fo=${params.max_fo}
-                placer_list=(\"${params.placer}\")
+                    placer_list=(\"${params.placer}\")
                     run_gs=${params.run_gs}
-                sizer=\"${params.gate_sizer}\"
+                    sizer=\"${params.gate_sizer}\"
                     router_list=(\"${params.router}\")
                     tile_size=${params.tile_size}
-                num_layer=${params.num_layers}
-                adjustment=${params.adjustment}
-                safety=${params.safety}
-                """
-                    sh 'chmod 755 config.sh'
+                    num_layer=${params.num_layers}
+                    adjustment=${params.adjustment}
+                    safety=${params.safety}
+                    """
+                    sh 'chmod 755 config.sh; cp config.sh /opt/datc_rdf/000_config'
                     echo "Done."
                     echo ""
             }
@@ -58,43 +57,43 @@ pipeline {
         stage('Logic Synthesis') {
             steps {
                 echo 'Running logic synthesis..'
-                    sh 'cd ${open_design_flow_dir}/100_logic_synthesis; ./run_batch'
+                    sh 'cd ${datc_rdf_dir}/100_logic_synthesis; ./run_batch'
             }
         }
         stage('Floorplanning') {
             steps {
                 echo 'Creating bookshelf files..'
-                    sh 'cd ${open_design_flow_dir}/200_floorplanning; ./run_batch'
+                    sh 'cd ${datc_rdf_dir}/200_floorplanning; ./run_batch'
             }
         }
         stage('Placement') {
             steps {
                 echo 'Running placement..'
-                    sh 'cd ${open_design_flow_dir}/300_placement; ./run_batch'
-                    sh 'cd ${open_design_flow_dir}/310_write_def; ./run_batch'
+                    sh 'cd ${datc_rdf_dir}/300_placement; ./run_batch'
+                    sh 'cd ${datc_rdf_dir}/310_write_def; ./run_batch'
             }
         }
         stage('Timing analysis') {
             steps {
                 echo 'Running timing analysis..'
-                    sh 'cd ${open_design_flow_dir}/320_timing; ./run_batch'
+                    sh 'cd ${datc_rdf_dir}/320_timing; ./run_batch'
             }
         }
         stage('Gate sizing') {
             steps {
                 echo 'Running timing analysis..'
-                    sh 'cd ${open_design_flow_dir}/400_gate_sizing; ./run_batch'
-                    sh 'cd ${open_design_flow_dir}/410_write_bookshelf; ./run_batch'
-                    sh 'cd ${open_design_flow_dir}/420_legalization; ./run_batch'
-                    sh 'cd ${open_design_flow_dir}/430_write_def; ./run_batch'
-                    sh 'cd ${open_design_flow_dir}/440_timing; ./run_batch'
+                    sh 'cd ${datc_rdf_dir}/400_gate_sizing; ./run_batch'
+                    sh 'cd ${datc_rdf_dir}/410_write_bookshelf; ./run_batch'
+                    sh 'cd ${datc_rdf_dir}/420_legalization; ./run_batch'
+                    sh 'cd ${datc_rdf_dir}/430_write_def; ./run_batch'
+                    sh 'cd ${datc_rdf_dir}/440_timing; ./run_batch'
             }
         }
         stage('Global Routing') {
             steps {
                 echo 'Running global routing..'
-                    sh 'cd ${open_design_flow_dir}/500_gr_bench_gen; ./run_batch'
-                    sh 'cd ${open_design_flow_dir}/510_global_route; ./run_batch'
+                    sh 'cd ${datc_rdf_dir}/500_gr_bench_gen; ./run_batch'
+                    sh 'cd ${datc_rdf_dir}/510_global_route; ./run_batch'
             }
         }
     }
@@ -102,28 +101,28 @@ pipeline {
         always {
             script {
                 sh "mkdir ${result_dir}"
-                    sh "mv ${open_design_flow_dir}/100_logic_synthesis/${synth_name} ${result_dir}/1_logic_synth"
-                    sh "mv ${open_design_flow_dir}/200_floorplanning/bookshelf-${synth_name} ${result_dir}/2_bookshelf"
-                    sh "mv ${open_design_flow_dir}/300_placement/${place_name} ${result_dir}/3_placement"
-                    sh "mv ${open_design_flow_dir}/310_write_def/${place_name}.def ${result_dir}/3_placement/"
-                    sh "mv ${open_design_flow_dir}/320_timing/${place_name}/out ${result_dir}/4_timing_report"
+                    sh "mv ${datc_rdf_dir}/100_logic_synthesis/${synth_name} ${result_dir}/1_logic_synth"
+                    sh "mv ${datc_rdf_dir}/200_floorplanning/bookshelf-${synth_name} ${result_dir}/2_bookshelf"
+                    sh "mv ${datc_rdf_dir}/300_placement/${place_name} ${result_dir}/3_placement"
+                    sh "mv ${datc_rdf_dir}/310_write_def/${place_name}.def ${result_dir}/3_placement/"
+                    sh "mv ${datc_rdf_dir}/320_timing/${place_name}/out ${result_dir}/4_timing_report"
 
                     if ( params.run_gs == true ) {
-                        sh "mv ${open_design_flow_dir}/400_gate_sizing/${sizing_name} ${result_dir}/5_gate_sizing"
-                            sh "mv ${open_design_flow_dir}/420_legalization/${sizing_name}_FP/${params.design}_FP_dp.pl ${result_dir}/5_gate_sizing"
-                            sh "mv ${open_design_flow_dir}/420_legalization/${sizing_name}_FP/${sizing_name}.png ${result_dir}/5_gate_sizing"
-                            sh "mv ${open_design_flow_dir}/420_legalization/${sizing_name}_FP/${sizing_name}.plt.gz ${result_dir}/5_gate_sizing"
-                            sh "mv ${open_design_flow_dir}/430_write_def/${sizing_name}_FP/${sizing_name}.def ${result_dir}/5_gate_sizing/"
-                            sh "mv ${open_design_flow_dir}/440_timing/${sizing_name}/out ${result_dir}/5_gate_sizing/timing_report"
+                        sh "mv ${datc_rdf_dir}/400_gate_sizing/${sizing_name} ${result_dir}/5_gate_sizing"
+                            sh "mv ${datc_rdf_dir}/420_legalization/${sizing_name}_FP/${params.design}_FP_dp.pl ${result_dir}/5_gate_sizing"
+                            sh "mv ${datc_rdf_dir}/420_legalization/${sizing_name}_FP/${sizing_name}.png ${result_dir}/5_gate_sizing"
+                            sh "mv ${datc_rdf_dir}/420_legalization/${sizing_name}_FP/${sizing_name}.plt.gz ${result_dir}/5_gate_sizing"
+                            sh "mv ${datc_rdf_dir}/430_write_def/${sizing_name}_FP/${sizing_name}.def ${result_dir}/5_gate_sizing/"
+                            sh "mv ${datc_rdf_dir}/440_timing/${sizing_name}/out ${result_dir}/5_gate_sizing/timing_report"
 
                             sh "gzip ${result_dir}/5_gate_sizing/timing_report/*.spef";
                         sh "gzip ${result_dir}/5_gate_sizing/timing_report/*.plt";
 
-                        sh "mv ${open_design_flow_dir}/510_global_route/gr_${routing_name} ${result_dir}/6_global_route"
-                            sh "mv ${open_design_flow_dir}/500_gr_bench_gen/${place_name}.gr ${result_dir}/6_global_route/${place_name}.gr"
+                        sh "mv ${datc_rdf_dir}/510_global_route/gr_${routing_name} ${result_dir}/6_global_route"
+                            sh "mv ${datc_rdf_dir}/500_gr_bench_gen/${place_name}.gr ${result_dir}/6_global_route/${place_name}.gr"
                     } else {
-                        sh "mv ${open_design_flow_dir}/510_global_route/gr_${routing_name} ${result_dir}/5_global_route"
-                            sh "mv ${open_design_flow_dir}/500_gr_bench_gen/${place_name}.gr ${result_dir}/5_global_route/${place_name}.gr"  
+                        sh "mv ${datc_rdf_dir}/510_global_route/gr_${routing_name} ${result_dir}/5_global_route"
+                            sh "mv ${datc_rdf_dir}/500_gr_bench_gen/${place_name}.gr ${result_dir}/5_global_route/${place_name}.gr"  
                     }
 
                 if ( params.run_gs == true) {
@@ -131,12 +130,13 @@ pipeline {
                 }
                 sh "cd ${result_dir}; gzip 2_bookshelf/*"
                     sh "cd ${result_dir}; gzip */*.plt; gzip */*.pl; gzip */*.def;"
-                    sh "cd ${result_dir}; gzip */*.v; gzip */*.blif; gzip */*.spef; gzip */*.gr"
+                    sh "cd ${result_dir}; gzip */*.v; gzip */*.blif; gzip */*.gr"
+                    sh "find . -name '*.spef' -mtime 0 -type f -exec gzip '{}' \\;"
                     sh "cd ${result_dir}; gzip *global_route/bookshelf*/*"
 
                     sh "echo \"\" > ${result_dir}/${log_name}"
                     sh "echo \"--------------------------------------------------------------------------------\" >> ${result_dir}/${log_name}"
-                    sh "echo \"Thanks for using OpenDesign Flow.\" >> ${result_dir}/${log_name}"
+                    sh "echo \"Thanks for using DATC Robust Design Flow>> ${result_dir}/${log_name}"
                     sh "echo \"Results can be found at: \" >> ${result_dir}/${log_name}"
                     sh "echo \"    https://<open_design_flow_web_page>/${result_dir_name}\" >> ${result_dir}/${log_name}"
                     sh "echo \"--------------------------------------------------------------------------------\" >> ${result_dir}/${log_name}"
