@@ -136,7 +136,7 @@ pipeline {
 
                     sh "echo \"\" > ${result_dir}/${log_name}"
                     sh "echo \"--------------------------------------------------------------------------------\" >> ${result_dir}/${log_name}"
-                    sh "echo \"Thanks for using DATC Robust Design Flow>> ${result_dir}/${log_name}"
+                    sh "echo \"Thanks for using DATC Robust Design Flow\" >> ${result_dir}/${log_name}"
                     sh "echo \"Results can be found at: \" >> ${result_dir}/${log_name}"
                     sh "echo \"    https://<open_design_flow_web_page>/${result_dir_name}\" >> ${result_dir}/${log_name}"
                     sh "echo \"--------------------------------------------------------------------------------\" >> ${result_dir}/${log_name}"

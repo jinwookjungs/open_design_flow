@@ -22,7 +22,7 @@ do
             source ~/.bashrc
             bookshelf_dir=${fp_dir}/bookshelf-${bench}_${script}
             out_dir=${bench}_${script}_${placer}
-            ./run_place.sh ${bench} ${bookshelf_dir} $placer $out_dir
+            ./run_place.sh ${bench} ${bookshelf_dir} $placer ${target_density} ${out_dir}
         done
 	done
 done

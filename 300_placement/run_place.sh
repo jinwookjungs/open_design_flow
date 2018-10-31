@@ -7,14 +7,16 @@ contains() {
     done
     return 0
 }
-if test "$#" -ne 4; then
-    echo "Usage: ./run_place.sh <bench> <bookshelf_dir> <placer> <out_dir>"
-    echo "Available placers: [ComPLx | NTUPlace3 | mPL6 | mPL5 | Capo]"
+if test "$#" -ne 5; then
+    echo "Usage: ./run_place.sh <bench> <bookshelf_dir> <placer> <target_density> <out_dir>"
+    echo "Available placers: [ComPLx | NTUPlace3 | mPL6 | mPL5 | Capo | FastPlace-GP]"
     exit
-elif contains "ComPLx NTUPlace3 mPL6 mPL5 Capo " $3 = 0; then
-    echo "Available placers: [ComPLx | NTUPlace3 | mPL6 | mPL5 | Capo]"
+elif contains "ComPLx NTUPlace3 mPL6 mPL5 Capo FastPlaceGP" $3 = 0; then
+    echo "Available placers: [ComPLx | NTUPlace3 | mPL6 | mPL5 | Capo | FastPlace-GP]"
     exit
 fi
+
+
 
 # For run time measurement 
 START=$(date +%s)
@@ -22,7 +24,8 @@ START=$(date +%s)
 bench=$1
 bookshelf_dir=$2
 placer=$3
-out_dir=$4
+target_util=$4
+out_dir=$5
 
 aux_file=${bookshelf_dir}/${bench}.aux
 
@@ -34,7 +37,7 @@ log=${bench}_${placer}.log.txt
 # Capo placer
 #------------------------------------------------------------------------------
 if test "$placer" = "Capo"; then
-
+    echo "(I) Target density ($target_util) will be ignored, since you use Capo placer."
     cmd="$bin_dir/MetaPl-Capo10.2-Lnx64.exe -faster -f $aux_file -save"
     echo $cmd
     eval $cmd | tee ${log}
@@ -52,7 +55,7 @@ if test "$placer" = "Capo"; then
 #------------------------------------------------------------------------------
 elif test "$placer" = "NTUPlace3"; then
 
-    cmd="${bin_dir}/ntuplace3 -aux $aux_file"
+    cmd="${bin_dir}/ntuplace3 -aux $aux_file -util $target_util"
     echo $cmd
     eval $cmd | tee ${log}
 
@@ -70,12 +73,13 @@ elif test "$placer" = "NTUPlace3"; then
 #------------------------------------------------------------------------------
 elif test "$placer" = "ComPLx"; then
 
-    cmd="${bin_dir}/ComPLx.exe -f ${bookshelf_dir}/${bench}.aux -ut 0.9"
+    cmd="${bin_dir}/ComPLx.exe -f ${bookshelf_dir}/${bench}.aux -ut ${target_util}"
     echo $cmd
     eval $cmd | tee ${log}
 
     # Detailed placement with FastPlace3.0
-    cmd="${bin_dir}/FastPlace3.0_Linux64_DP -legalize -noFlipping ${bookshelf_dir} ${bench}.aux"
+    cmd="${bin_dir}/FastPlace3.0_Linux64_DP -legalize -noFlipping -target_density ${target_util}"
+    cmd="$cmd ${bookshelf_dir} ${bench}.aux"
     cmd="$cmd . ${bench}-ComPLx.pl"
     echo $cmd
     eval $cmd | tee --append ${log}
@@ -89,6 +93,31 @@ elif test "$placer" = "ComPLx"; then
 
     out_pl=${bench}_FP_dp.pl
 
+
+#------------------------------------------------------------------------------
+# FastPlaceGP 
+#------------------------------------------------------------------------------
+elif test "$placer" = "FastPlaceGP"; then
+
+    #./FastPlace3.0_Linux32_GP [options] <benchmark_dir> <aux_file> <output_dir>
+    cmd="${bin_dir}/FastPlace3.0_Linux32_GP -target_density ${target_util}"
+    cmd="$cmd ${bookshelf_dir} ${bench}.aux ."
+    echo $cmd
+    eval $cmd | tee ${log}
+
+    # Detailed placement with FastPlace3.0
+    cmd="${bin_dir}/FastPlace3.0_Linux64_DP -legalize -noFlipping -target_density ${target_util}"
+    cmd="$cmd ${bookshelf_dir} ${bench}.aux"
+    cmd="$cmd . ${bench}_FP_gp.pl"
+    echo $cmd
+    eval $cmd | tee --append ${log}
+
+    mv ${bench}_FP_gp.pl ${out_dir}/
+    mv ${bench}_FP_dp.pl ${out_dir}/
+
+    out_pl=${bench}_FP_dp.pl
+
+
 #------------------------------------------------------------------------------
 # mPL6 
 #------------------------------------------------------------------------------
@@ -96,13 +125,14 @@ elif test "$placer" = "mPL6"; then
 
 	cp ${bookshelf_dir}/* .
 	#cmd="${bin_dir}/mPL6 -d ${bench}.aux -cluster_ratio 0.1 -mvcycle 0 -mPL_DP 0"
-	cmd="${bin_dir}/mPL6 -d ${bench}.aux -mPL_DP 0"
+	cmd="${bin_dir}/mPL6 -d ${bench}.aux -mPL_DP 0 -target_density ${target_util}"
     echo $cmd
     eval $cmd | tee ${log}
 	rm -f ${bench}.aux ${bench}.nodes ${bench}.nets ${bench}.wts ${bench}.scl ${bench}.pl ${bench}.shapes
 
     # Detailed placement with FastPlace3.0
-    cmd="${bin_dir}/FastPlace3.0_Linux64_DP -legalize -noFlipping ${bookshelf_dir} ${bench}.aux"
+    cmd="${bin_dir}/FastPlace3.0_Linux64_DP -legalize -noFlipping -target_density ${target_util}"
+    cmd="$cmd ${bookshelf_dir} ${bench}.aux"
     cmd="$cmd . ${bench}-mPL.pl"
     echo $cmd
     eval $cmd | tee --append ${log}
@@ -123,13 +153,14 @@ elif test "$placer" = "mPL6"; then
 elif test "$placer" = "mPL5"; then
 
 	cp ${bookshelf_dir}/* .
-	cmd="${bin_dir}/mPL5 -d ${bench}.aux -mPL_DP 0"
+	cmd="${bin_dir}/mPL5 -d ${bench}.aux -mPL_DP 0 -target_density ${target_util}"
     echo $cmd
     eval $cmd | tee ${log}
 	rm -f ${bench}.aux ${bench}.nodes ${bench}.nets ${bench}.wts ${bench}.scl ${bench}.pl ${bench}.shapes
 
     # Detailed placement with FastPlace3.0
-    cmd="${bin_dir}/FastPlace3.0_Linux64_DP -legalize -noFlipping ${bookshelf_dir} ${bench}.aux"
+    cmd="${bin_dir}/FastPlace3.0_Linux64_DP -legalize -noFlipping -target_density ${target_util}"
+    cmd="$cmd -target_density ${target_util}"
     cmd="$cmd . ${bench}-mPL.pl"
     echo $cmd
     eval $cmd | tee --append ${log}

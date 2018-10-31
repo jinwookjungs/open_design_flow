@@ -7,10 +7,14 @@ floorplan_dir=`cd ../200_floorplanning; pwd -P`
 placement_dir=`cd ../300_placement; pwd -P`
 write_def_dir=`cd ../310_write_def; pwd -P`
 
-ICCAD_PARM='ICCAD15.parm'
-UTIL=0.9
-
 # Name used in ICCAD file
+ICCAD_PARM='ICCAD15.parm'
+UTIL=$target_density
+
+ln -s ../bin/iccad2015_evaluate_solution_src/iccad2015_evaluate_solution*
+ln -s ../bin/iccad2015_evaluate_solution_src/PORT9.dat
+ln -s ../bin/iccad2015_evaluate_solution_src/POWV9.dat
+ln -s ../bin/iccad2015_evaluate_solution_src/ICCAD15.parm
 
 for bench in "${bench_list[@]}"
 do
@@ -53,7 +57,7 @@ do
             > $iccad_file
 
             # Run
-            cmd="./iccad2015_evaluate_solution $ICCAD_PARM $iccad_file $UTIL"
+            cmd="./iccad2015_evaluate_solution $ICCAD_PARM $iccad_file $target_density"
             echo $cmd
             $cmd | tee ${base_name}.log.txt
 
