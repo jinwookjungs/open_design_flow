@@ -39,6 +39,8 @@ do
                 solution_pl="${bench}.ntup.pl"
             elif test $placer = "ComPLx"; then
                 solution_pl="${bench}_FP_dp.pl"
+            elif test $placer = "FastPlace-GP"; then
+                solution_pl="${bench}_FP_dp.pl"
             elif test $placer = "mPL6"; then
                 solution_pl="${bench}-mPL.pl"
             elif test $placer = "mPL5"; then

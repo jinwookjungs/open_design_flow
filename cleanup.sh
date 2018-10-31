@@ -1,0 +1,12 @@
+find 100_logic_synthesis -mindepth 1 ! \( -name "run_*" -o -name 'Makefile' -o -name '.gitignore' \) -exec rm -rf {} +
+find 200_floorplanning   -mindepth 1 ! \( -name "run_*" -o -name 'Makefile' -o -name '.gitignore' \) -exec rm -rf {} +
+find 300_placement       -mindepth 1 ! \( -name "run_*" -o -name 'Makefile' -o -name '.gitignore' \) -exec rm -rf {} +
+find 310_write_def       -mindepth 1 ! \( -name "run_*" -o -name 'Makefile' -o -name '.gitignore' \) -exec rm -rf {} +
+find 320_timing          -mindepth 1 ! \( -name "run_*" -o -name 'Makefile' -o -name '.gitignore' \) -exec rm -rf {} +
+find 400_gate_sizing     -mindepth 1 ! \( -name "run_*" -o -name 'Makefile' -o -name '.gitignore' \) -exec rm -rf {} +
+find 410_write_bookshelf -mindepth 1 ! \( -name "run_*" -o -name 'Makefile' -o -name '.gitignore' \) -exec rm -rf {} +
+find 420_legalization    -mindepth 1 ! \( -name "run_*" -o -name 'Makefile' -o -name '.gitignore' \) -exec rm -rf {} +
+find 430_write_def       -mindepth 1 ! \( -name "run_*" -o -name 'Makefile' -o -name '.gitignore' \) -exec rm -rf {} +
+find 440_timing          -mindepth 1 ! \( -name "run_*" -o -name 'Makefile' -o -name '.gitignore' \) -exec rm -rf {} +
+find 500_gr_bench_gen    -mindepth 1 ! \( -name "run_*" -o -name 'Makefile' -o -name '.gitignore' \) -exec rm -rf {} +
+find 510_global_route    -mindepth 1 ! \( -name "run_*" -o -name 'Makefile' -o -name '.gitignore' \) -exec rm -rf {} +

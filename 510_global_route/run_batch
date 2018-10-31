@@ -5,6 +5,10 @@ fp_dir="../200_floorplanning"
 place_dir="../300_placement"
 gr_bench_dir="../500_gr_bench_gen"
 
+ln -s ../bin/POWV9.dat
+ln -s ../bin/POST9.dat
+ln -s ../bin/PORT9.dat
+
 for bench in "${bench_list[@]}"
 do
     for script in "${script_list[@]}"
@@ -64,3 +68,7 @@ do
         done
     done
 done
+
+rm -f POWV9.dat
+rm -f POST9.dat
+rm -f PORT9.dat

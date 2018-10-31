@@ -64,7 +64,7 @@ do
             # Move output files
             rm -f uitimer.tr
 
-#            gnuplot ${bench}_critical.plt
+            gnuplot ${bench}_critical.plt
             gnuplot ${bench}_grid.plt
             mv *.png ${base_name}/out
 

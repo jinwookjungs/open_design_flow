@@ -11,7 +11,7 @@ if test "$#" -ne 5; then
     echo "Usage: ./run_place.sh <bench> <bookshelf_dir> <placer> <target_density> <out_dir>"
     echo "Available placers: [ComPLx | NTUPlace3 | mPL6 | mPL5 | Capo | FastPlace-GP]"
     exit
-elif contains "ComPLx NTUPlace3 mPL6 mPL5 Capo FastPlaceGP" $3 = 0; then
+elif contains "ComPLx NTUPlace3 mPL6 mPL5 Capo FastPlace-GP" $3 = 0; then
     echo "Available placers: [ComPLx | NTUPlace3 | mPL6 | mPL5 | Capo | FastPlace-GP]"
     exit
 fi
@@ -32,6 +32,10 @@ aux_file=${bookshelf_dir}/${bench}.aux
 bin_dir="../bin"
 log=${bench}_${placer}.log.txt
 
+if [ -d $out_dir ]; then
+rm -rf $out_dir
+fi
+mkdir $out_dir
 
 #------------------------------------------------------------------------------
 # Capo placer
@@ -42,10 +46,6 @@ if test "$placer" = "Capo"; then
     echo $cmd
     eval $cmd | tee ${log}
 
-    if [ -d $out_dir ]; then
-        rm -rf $out_dir
-    fi
-    mkdir $out_dir
     mv out.pl ${out_dir}/${bench}_Capo.pl
 
     out_pl=${bench}_Capo.pl
@@ -59,10 +59,6 @@ elif test "$placer" = "NTUPlace3"; then
     echo $cmd
     eval $cmd | tee ${log}
 
-    if [ -d $out_dir ]; then
-        rm -rf $out_dir
-    fi
-    mkdir $out_dir
     mv *.pl $out_dir
     mv *.plt $out_dir
 
@@ -84,10 +80,6 @@ elif test "$placer" = "ComPLx"; then
     echo $cmd
     eval $cmd | tee --append ${log}
 
-    if [ -d $out_dir ]; then
-        rm -rf $out_dir
-    fi
-    mkdir $out_dir
     mv ${bench}-ComPLx.pl ${out_dir}/
     mv ${bench}_FP_dp.pl ${out_dir}/
 
@@ -97,7 +89,7 @@ elif test "$placer" = "ComPLx"; then
 #------------------------------------------------------------------------------
 # FastPlaceGP 
 #------------------------------------------------------------------------------
-elif test "$placer" = "FastPlaceGP"; then
+elif test "$placer" = "FastPlace-GP"; then
 
     #./FastPlace3.0_Linux32_GP [options] <benchmark_dir> <aux_file> <output_dir>
     cmd="${bin_dir}/FastPlace3.0_Linux32_GP -target_density ${target_util}"
@@ -116,6 +108,7 @@ elif test "$placer" = "FastPlaceGP"; then
     mv ${bench}_FP_dp.pl ${out_dir}/
 
     out_pl=${bench}_FP_dp.pl
+
 
 
 #------------------------------------------------------------------------------
@@ -137,10 +130,6 @@ elif test "$placer" = "mPL6"; then
     echo $cmd
     eval $cmd | tee --append ${log}
 
-    if [ -d $out_dir ]; then
-        rm -rf $out_dir
-    fi
-    mkdir $out_dir
     # mv *mPL-gp.pl $out_dir
     mv *mPL.pl $out_dir
     mv ${bench}_FP_dp.pl ${out_dir}/
@@ -165,10 +154,6 @@ elif test "$placer" = "mPL5"; then
     echo $cmd
     eval $cmd | tee --append ${log}
 
-    if [ -d $out_dir ]; then
-        rm -rf $out_dir
-    fi
-    mkdir $out_dir
     mv *mPL.pl $out_dir
     mv ${bench}_FP_dp.pl ${out_dir}/
 

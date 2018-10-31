@@ -18,7 +18,12 @@ sizer_legalization_dir=`cd ../420_legalization; pwd -P`
 sizer_def_dir=`cd ../430_write_def; pwd -P`
 
 ICCAD_PARM='ICCAD15.parm'
-UTIL=0.7
+UTIL=$target_density
+
+ln -s ../bin/iccad2015_evaluate_solution_src/iccad2015_evaluate_solution*
+ln -s ../bin/iccad2015_evaluate_solution_src/PORT9.dat
+ln -s ../bin/iccad2015_evaluate_solution_src/POWV9.dat
+ln -s ../bin/iccad2015_evaluate_solution_src/ICCAD15.parm
 
 # Name used in ICCAD file
 
@@ -72,7 +77,7 @@ do
             # Move output files
             rm -f uitimer.tr
 
-#            gnuplot ${bench}_critical.plt
+            gnuplot ${bench}_critical.plt
             gnuplot ${bench}_grid.plt
             mv *.png ${base_name}/out
 
@@ -89,3 +94,10 @@ do
         done
 	done
 done
+
+rm -f iccad2015_evaluate_solution*
+rm -f PORT9.dat
+rm -f POWV9.dat
+rm -f ICCAD15.parm
+
+
