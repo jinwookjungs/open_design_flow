@@ -81,3 +81,10 @@ do
         done
 	done
 done
+
+rm -f iccad2015_evaluate_solution*
+rm -f PORT9.dat
+rm -f POWV9.dat
+rm -f ICCAD15.parm
+
+
