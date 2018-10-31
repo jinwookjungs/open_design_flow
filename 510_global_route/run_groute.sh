@@ -30,7 +30,7 @@ bin_dir="../bin"
 # NCTUgr
 #------------------------------------------------------------------------------
 if test "$router" = "NCTUgr"; then
-    cmd="$bin_dir/NCTUgr REGULAR_ISPD $input_gr ${bin_dir}/NCTUgr_RegularHighQuality.set $out_name"
+    cmd="$bin_dir/NCTUgr REGULAR_ISPD $input_gr ${bin_dir}/NCTU-GR/Parameter_Files/RegularDefault.set $out_name"
     echo $cmd
     eval $cmd | tee $log
 
