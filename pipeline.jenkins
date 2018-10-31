@@ -25,6 +25,7 @@ pipeline {
                     echo "Logc synthesis script   : ${params.synth_script}"
                     echo "Max fanout of buffering : ${params.max_fo}"
                     echo "Placer                  : ${params.placer}"
+                    echo "    Target density      : ${params.target_density}"
                     echo "Do gate sizing          : ${params.run_gs}"
                     echo "Gate sizer              : ${params.gate_sizer}"
                     echo "Selected router         : ${params.router}"
@@ -41,6 +42,7 @@ pipeline {
                     script_list=(\"${params.synth_script}\")
                     max_fo=${params.max_fo}
                     placer_list=(\"${params.placer}\")
+                    target_density=${params.target_density}
                     run_gs=${params.run_gs}
                     sizer=\"${params.gate_sizer}\"
                     router_list=(\"${params.router}\")
@@ -101,52 +103,55 @@ pipeline {
         always {
             script {
                 sh "mkdir ${result_dir}"
-                    sh "mv ${datc_rdf_dir}/100_logic_synthesis/${synth_name} ${result_dir}/1_logic_synth"
-                    sh "mv ${datc_rdf_dir}/200_floorplanning/bookshelf-${synth_name} ${result_dir}/2_bookshelf"
-                    sh "mv ${datc_rdf_dir}/300_placement/${place_name} ${result_dir}/3_placement"
-                    sh "mv ${datc_rdf_dir}/310_write_def/${place_name}.def ${result_dir}/3_placement/"
-                    sh "mv ${datc_rdf_dir}/320_timing/${place_name}/out ${result_dir}/4_timing_report"
+                sh "mv ${datc_rdf_dir}/100_logic_synthesis/${synth_name} ${result_dir}/1_logic_synth"
+                sh "mv ${datc_rdf_dir}/200_floorplanning/bookshelf-${synth_name} ${result_dir}/2_bookshelf"
+                sh "mv ${datc_rdf_dir}/300_placement/${place_name} ${result_dir}/3_placement"
+                sh "mv ${datc_rdf_dir}/310_write_def/${place_name}.def ${result_dir}/3_placement/"
+                sh "mv ${datc_rdf_dir}/320_timing/${place_name}/out ${result_dir}/4_timing_report"
 
-                    if ( params.run_gs == true ) {
-                        sh "mv ${datc_rdf_dir}/400_gate_sizing/${sizing_name} ${result_dir}/5_gate_sizing"
-                            sh "mv ${datc_rdf_dir}/420_legalization/${sizing_name}_FP/${params.design}_FP_dp.pl ${result_dir}/5_gate_sizing"
-                            sh "mv ${datc_rdf_dir}/420_legalization/${sizing_name}_FP/${sizing_name}.png ${result_dir}/5_gate_sizing"
-                            sh "mv ${datc_rdf_dir}/420_legalization/${sizing_name}_FP/${sizing_name}.plt.gz ${result_dir}/5_gate_sizing"
-                            sh "mv ${datc_rdf_dir}/430_write_def/${sizing_name}_FP/${sizing_name}.def ${result_dir}/5_gate_sizing/"
-                            sh "mv ${datc_rdf_dir}/440_timing/${sizing_name}/out ${result_dir}/5_gate_sizing/timing_report"
+                if ( params.run_gs == true ) {
+                    sh "mv ${datc_rdf_dir}/400_gate_sizing/${sizing_name} ${result_dir}/5_gate_sizing"
+                    sh "mv ${datc_rdf_dir}/420_legalization/${sizing_name}_FP/${params.design}_FP_dp.pl ${result_dir}/5_gate_sizing"
+                    sh "mv ${datc_rdf_dir}/420_legalization/${sizing_name}_FP/${sizing_name}.png ${result_dir}/5_gate_sizing"
+                    sh "mv ${datc_rdf_dir}/420_legalization/${sizing_name}_FP/${sizing_name}.plt.gz ${result_dir}/5_gate_sizing"
+                    sh "mv ${datc_rdf_dir}/430_write_def/${sizing_name}_FP/${sizing_name}.def ${result_dir}/5_gate_sizing/"
+                    sh "mv ${datc_rdf_dir}/440_timing/${sizing_name}/out ${result_dir}/5_gate_sizing/timing_report"
+                    
+                    sh "gzip ${result_dir}/5_gate_sizing/timing_report/*.spef";
+                    sh "gzip ${result_dir}/5_gate_sizing/timing_report/*.plt";
 
-                            sh "gzip ${result_dir}/5_gate_sizing/timing_report/*.spef";
-                        sh "gzip ${result_dir}/5_gate_sizing/timing_report/*.plt";
-
-                        sh "mv ${datc_rdf_dir}/510_global_route/gr_${routing_name} ${result_dir}/6_global_route"
-                            sh "mv ${datc_rdf_dir}/500_gr_bench_gen/${place_name}.gr ${result_dir}/6_global_route/${place_name}.gr"
+                    sh "mv ${datc_rdf_dir}/510_global_route/gr_${routing_name} ${result_dir}/6_global_route"
+                    sh "mv ${datc_rdf_dir}/500_gr_bench_gen/${place_name}.gr ${result_dir}/6_global_route/${place_name}.gr"
                     } else {
                         sh "mv ${datc_rdf_dir}/510_global_route/gr_${routing_name} ${result_dir}/5_global_route"
-                            sh "mv ${datc_rdf_dir}/500_gr_bench_gen/${place_name}.gr ${result_dir}/5_global_route/${place_name}.gr"  
+                        sh "mv ${datc_rdf_dir}/500_gr_bench_gen/${place_name}.gr ${result_dir}/5_global_route/${place_name}.gr"  
                     }
 
                 if ( params.run_gs == true) {
                     sh "cd ${result_dir}/5_gate_sizing; rm *.spef; rm *_final.v; rm *.lib"
                 }
                 sh "cd ${result_dir}; gzip 2_bookshelf/*"
-                    sh "cd ${result_dir}; gzip */*.plt; gzip */*.pl; gzip */*.def;"
-                    sh "cd ${result_dir}; gzip */*.v; gzip */*.blif; gzip */*.gr"
-                    sh "find . -name '*.spef' -mtime 0 -type f -exec gzip '{}' \\;"
-                    sh "cd ${result_dir}; gzip *global_route/bookshelf*/*"
+                sh "cd ${result_dir}; gzip */*.plt; gzip */*.pl; gzip */*.def;"
+                sh "cd ${result_dir}; gzip */*.v; gzip */*.blif; gzip */*.gr"
+                sh "find . -name '*.spef' -mtime 0 -type f -exec gzip '{}' \\;"
+                sh "cd ${result_dir}; gzip *global_route/bookshelf*/*"
 
-                    sh "echo \"\" > ${result_dir}/${log_name}"
-                    sh "echo \"--------------------------------------------------------------------------------\" >> ${result_dir}/${log_name}"
-                    sh "echo \"Thanks for using DATC Robust Design Flow\" >> ${result_dir}/${log_name}"
-                    sh "echo \"Results can be found at: \" >> ${result_dir}/${log_name}"
-                    sh "echo \"    https://<open_design_flow_web_page>/${result_dir_name}\" >> ${result_dir}/${log_name}"
-                    sh "echo \"--------------------------------------------------------------------------------\" >> ${result_dir}/${log_name}"
-                    sh "echo \"\" >> ${result_dir}/${log_name}"
-                    sh "cd ${log_dir}; for f in {1..100}.log; do if [ -f \$f ]; then cat \$f  >> ${result_dir}/${log_name}; fi done;"
+                sh "echo \"\" > ${result_dir}/${log_name}"
+                sh "echo \"--------------------------------------------------------------------------------\" >> ${result_dir}/${log_name}"
+                sh "echo \"Thanks for using DATC Robust Design Flow.\" >> ${result_dir}/${log_name}"
+                sh "echo \"Results can be found at: \" >> ${result_dir}/${log_name}"
+                sh "echo \"    https://<datc_rdf_web_page>/${result_dir_name}\" >> ${result_dir}/${log_name}"
+                sh "echo \"--------------------------------------------------------------------------------\" >> ${result_dir}/${log_name}"
+                sh "echo \"\" >> ${result_dir}/${log_name}"
+                sh "cd ${log_dir}; for f in {1..100}.log; do if [ -f \$f ]; then cat \$f  >> ${result_dir}/${log_name}; fi done;"
 
-                    sh "echo \"\" >> ${result_dir}/${log_name}"
-                    sh "echo \"\" >> ${result_dir}/${log_name}"
-                    sh "echo \"Done.\" >> ${result_dir}/${log_name}"
-                    sh "echo \"\" >> ${result_dir}/${log_name}"
+                sh "echo \"\" >> ${result_dir}/${log_name}"
+                sh "echo \"\" >> ${result_dir}/${log_name}"
+                sh "echo \"Done.\" >> ${result_dir}/${log_name}"
+                sh "echo \"\" >> ${result_dir}/${log_name}"
+                
+                // Cleanning up the workspace
+                sh 'cd ${datc_rdf_dir}; ./cleanup.sh'
             }
             cleanWs()
         }
