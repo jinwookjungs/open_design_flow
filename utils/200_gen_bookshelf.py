@@ -127,6 +127,8 @@ def write_bookshelf_nodes(dest, the_verilog, the_lef, the_def, fix_big_blocks):
     width_divider  = the_lef.metal_layer_dict[the_lef.m2_layer_name]
     height_divider = the_lef.metal_layer_dict[the_lef.m1_layer_name]
 
+    min_height = 987654321
+
     for g in the_verilog.instances:
         # Find width and height from LEF
         if g.gate_type in ('PI', 'PO'):
@@ -142,6 +144,8 @@ def write_bookshelf_nodes(dest, the_verilog, the_lef, the_def, fix_big_blocks):
 
             f_nodes.write("%-40s %15d %15d\n" % \
                           (g.name, int(width_in_bs), int(height_in_bs)))
+
+            min_height = height_in_bs if min_height > height_in_bs else min_height
 
         else:
             sys.stderr.write("Cannot find macro definition for %s. \n" % (g))
@@ -171,7 +175,7 @@ def write_bookshelf_nodes(dest, the_verilog, the_lef, the_def, fix_big_blocks):
 
     # Ports
     for t in inputs + outputs:
-        f_nodes.write("%-40s %15d %15d %15s\n" % (t, 1, 1, 'terminal'))
+        f_nodes.write("%-40s %15d %15d %15s\n" % (t, min_height, min_height, 'terminal'))
     
     f_nodes.close()
 

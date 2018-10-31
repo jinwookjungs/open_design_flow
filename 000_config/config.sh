@@ -3,7 +3,7 @@
                     script_list=("resyn")
                     max_fo=16
                     placer_list=("ComPLx")
-                    target_density=95
+                    target_density=0.85
                     run_gs=false
                     sizer="USizer"
                     router_list=("NCTUgr")
